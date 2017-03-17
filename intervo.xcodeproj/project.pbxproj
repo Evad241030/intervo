@@ -12,6 +12,7 @@
 		228813C51E7B297F000C3928 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 228813C31E7B297F000C3928 /* Main.storyboard */; };
 		228813C71E7B297F000C3928 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 228813C61E7B297F000C3928 /* Assets.xcassets */; };
 		228813CA1E7B297F000C3928 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 228813C81E7B297F000C3928 /* LaunchScreen.storyboard */; };
+		22D1116B1E7C46B40039F580 /* ClockReadout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22D1116A1E7C46B40039F580 /* ClockReadout.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		228813C61E7B297F000C3928 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		228813C91E7B297F000C3928 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		228813CB1E7B297F000C3928 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		22D1116A1E7C46B40039F580 /* ClockReadout.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClockReadout.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +59,7 @@
 				228813BF1E7B297F000C3928 /* AppDelegate.swift */,
 				228813C11E7B297F000C3928 /* ViewController.swift */,
 				228813C31E7B297F000C3928 /* Main.storyboard */,
+				22D1116A1E7C46B40039F580 /* ClockReadout.swift */,
 				228813C61E7B297F000C3928 /* Assets.xcassets */,
 				228813C81E7B297F000C3928 /* LaunchScreen.storyboard */,
 				228813CB1E7B297F000C3928 /* Info.plist */,
@@ -138,6 +141,7 @@
 			files = (
 				228813C21E7B297F000C3928 /* ViewController.swift in Sources */,
 				228813C01E7B297F000C3928 /* AppDelegate.swift in Sources */,
+				22D1116B1E7C46B40039F580 /* ClockReadout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,6 +301,7 @@
 				228813D01E7B297F000C3928 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
