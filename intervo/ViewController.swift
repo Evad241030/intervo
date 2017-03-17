@@ -14,6 +14,9 @@ class ViewController: UIViewController {
     var interval: Double = 0
     var framesShot: Int = 0
     var timerIsOn = false
+    
+    // I'm setting my timerLabel.text to a string literal.
+    var stopWatchString: String?
     var clockOne = ClockReadout()
     var startStopWatch: Bool = true
 
@@ -35,6 +38,13 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var timerButton: UIButton!
     
+    @IBAction func quickClearHit(_ sender: Any) {
+        clockOne.hours = 0
+        clockOne.seconds = 0
+        clockOne.minutes = 0
+        timerLabel.text = "00:00:00"
+
+    }
     
     //This is essential my StartStop Button. I didn't rename it to avoid the hassle.
 
@@ -42,6 +52,7 @@ class ViewController: UIViewController {
         
         if startStopWatch == true {
             timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
+
             startStopWatch = false
             timerButton.setTitle("Stop Timer", for: UIControlState.normal)
             
@@ -52,12 +63,30 @@ class ViewController: UIViewController {
         }
         
     }
-//TODO: I want to add a "0" suffic for any time the second, minute, or hour is between 1-9... In the case of "blank" I want those to readout "00" 
+//TODO: I want to add a "0" suffic for any time the second, minute, or hour is between 1-9... In the case of "blank" I want those to readout "00"
     //MARK: This updates my first clock readout.
     func updateTimer() {
-        clockOne.seconds += 1
-        timerLabel.text = ("test 00:00:\(clockOne.seconds)")
         
+        
+        clockOne.seconds += 1
+
+        
+        if clockOne.seconds == 60 {
+            clockOne.minutes += 1
+            clockOne.seconds = 0
+        }
+        
+        if clockOne.minutes == 60 {
+            clockOne.hours += 1
+            clockOne.minutes = 0
+        }
+    
+        let secondsString = clockOne.seconds > 9 ? "\(clockOne.seconds)" : "0\(clockOne.seconds)"
+        let minutesString = clockOne.minutes > 9 ? "\(clockOne.minutes)" : "0\(clockOne.minutes)"
+        let hoursString = clockOne.hours > 9 ? "\(clockOne.hours)" : "0\(clockOne.hours)"
+        
+        stopWatchString = "\(hoursString):\(minutesString):\(secondsString)"
+        timerLabel.text = stopWatchString
     }
     
     
