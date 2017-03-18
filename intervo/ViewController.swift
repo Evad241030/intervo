@@ -11,7 +11,7 @@ import UIKit
 class ViewController: UIViewController {
 
     var timer = Timer()
-    var interval: Double = 0
+//    var interval: Double = 0
     // no longer need this
 //    var ticker = 0
     var framesShot: Int = 0 {
@@ -22,6 +22,7 @@ class ViewController: UIViewController {
     
     var timerIsOn = false
     var fps: Int = 0
+    var shootInterval:Double = 1
     // I'm setting my timerLabel.text to a string literal.
     var stopWatchString: String?
     var clockOne = ClockReadout()
@@ -63,8 +64,26 @@ class ViewController: UIViewController {
     }
     
     
-    //TODO: Add Outlet for Slider
+
     // TODO: Set Slider to .5 second increment for if value is set to 0
+    
+    @IBAction func sliderMoved(_ sender: Any) {
+        
+        let tempValue = intervalSlider.value
+        if tempValue == 0.0 {
+            shootInterval = 0.5
+            sliderLabel.text = String(format: "%.01f", shootInterval)
+
+        } else {
+            shootInterval = round(Double(tempValue))
+            sliderLabel.text = String(format: "%.0f", shootInterval)
+        }
+        
+        
+    }
+    
+    @IBOutlet weak var sliderLabel: UILabel!
+    
     @IBOutlet weak var intervalSlider: UISlider!
     
     
