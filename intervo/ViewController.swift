@@ -29,7 +29,7 @@ class ViewController: UIViewController {
 
     var timer = Timer()
     var framesShot: Int = 0 {
-        willSet {
+        didSet {
             updateLabels()
         }
     }
@@ -102,10 +102,14 @@ class ViewController: UIViewController {
     @IBOutlet weak var timerButton: UIButton!
     
     
+    @IBOutlet weak var quickClear: UIButton!
     @IBAction func quickClearHit(_ sender: Any) {
         clockOne.hours = 0
         clockOne.minutes = 0
         clockOne.seconds = 0
+        clipLength.hours = 0
+        clipLength.minutes = 0
+        clipLength.seconds = 0
         framesShot = 0
         timerLabel.text = "00:00:00"
         framesShotLabel.text = "000"
@@ -117,17 +121,34 @@ class ViewController: UIViewController {
         if startStopWatch == true {
             timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
             startStopWatch = false
-            timerButton.setTitle("Stop Timer", for: UIControlState.normal)
-            intervalSlider.isEnabled = false
+            timerButton.setTitle("Pause Timer", for: UIControlState.normal)
+            timerIsOn = true
+            disableToggle()
         } else {
             timer.invalidate()
             timerButton.setTitle("Start Timer", for: UIControlState.normal)
             startStopWatch = true
-            intervalSlider.isEnabled = true
+            timerIsOn = false
+            disableToggle()
         }
         
     }
 
+    
+    // Turn on or off any features when timer is running or when time is not running.
+    func disableToggle() {
+        if timerIsOn {
+            intervalSlider.isEnabled = false
+            quickClear.isEnabled = false
+        } else {
+            intervalSlider.isEnabled = true
+            quickClear.isEnabled = true
+        }
+
+    }
+    
+    
+    // This works with my main clock.
     func updateTimer() {
 
         clockOne.seconds += 1
@@ -154,8 +175,6 @@ class ViewController: UIViewController {
     
     
     // Updates Frames Shot Label - Based on increment.
-    //TODO: Need to factor in the value of Interval
-    
     func updateFrames() {
 
         intervalCounter += 1
@@ -164,8 +183,8 @@ class ViewController: UIViewController {
         if shootInterval < 1 {
             framesShot += 2
             framesShotLabel.text = "\(framesShot)"
-
-        } else if intervalCounter == shootInterval {
+            intervalCounter = 0
+        } else if shootInterval == intervalCounter {
             framesShot += 1
         framesShotLabel.text = "\(framesShot)"
             intervalCounter = 0
@@ -173,7 +192,7 @@ class ViewController: UIViewController {
         
     }
 
-    
+    // Update estimated Clip Length
     func updateLabels() {
         
         clipLength.seconds = (framesShot / fps)

@@ -115,6 +115,7 @@
                         <outlet property="fpsSegmentControl" destination="rFB-Wy-9Bj" id="3sJ-h3-ufG"/>
                         <outlet property="framesShotLabel" destination="5Lm-Na-A2K" id="4XS-nG-Uqp"/>
                         <outlet property="intervalSlider" destination="2Zv-wJ-W4V" id="fRA-L0-4G0"/>
+                        <outlet property="quickClear" destination="4g5-zu-Gwc" id="jll-1s-sFi"/>
                         <outlet property="sliderLabel" destination="sTb-7Q-pXT" id="paU-vi-nK7"/>
                         <outlet property="timerButton" destination="uRg-YF-7Yi" id="4Kf-vY-CTG"/>
                         <outlet property="timerLabel" destination="MO0-qy-0u6" id="akL-E4-evv"/>
