@@ -6,6 +6,15 @@
 //  Copyright © 2017 David Gonzalez. All rights reserved.
 //
 
+//TODO: I could refactor estimated clip length to create a second instance of ClockReadout.
+
+//TODO: I could branch out and make it so that You can enter desired clip length.
+
+//TODO: I could created another branch to enter available time / And instead of counting time up - it counts down time.
+
+//TODO: If all those things are going well, then I can try to make it so that Frames Shot allows for the user to enter.
+
+
 import UIKit
 
 class ViewController: UIViewController {
@@ -19,16 +28,15 @@ class ViewController: UIViewController {
     
     var timerIsOn = false
     var fps: Int = 24
-    var shootInterval:Double = 1
+    var shootInterval: Int = 1
+    var intervalCounter: Int = 0
     var stopWatchString: String?
     var clockOne = ClockReadout()
     var startStopWatch: Bool = true
-    var fractions: Int = 0
 
-    @IBOutlet weak var clipLengthLabel: UILabel!
     
     @IBOutlet weak var fpsSegmentControl: UISegmentedControl!
-    //FIX: I need to set the initial value of selected segment index to something or else the app will crash. I'm currently hacking it, but selecting one - and jumping to another to initialize a value.
+
     @IBAction func changeFPS(_ sender: Any) {
         
         let fpsSelected = fpsSegmentControl.selectedSegmentIndex
@@ -54,33 +62,33 @@ class ViewController: UIViewController {
             print("\(fps)")
         }
     }
-    
+    //FIX: BUG - Still display Shoot Interval is 0 seconds.
+    //FIX: BUG - After working intially, readjusting values - counter won't work
     @IBAction func sliderMoved(_ sender: Any) {
         
         let tempValue = intervalSlider.value
         if tempValue == 0.0 {
-            shootInterval = 0.5
-            sliderLabel.text = String(format: "%.01f", shootInterval)
+            shootInterval = Int(Double(tempValue))
+            sliderLabel.text = "Shoot Interval: 0.5 seconds."
         } else {
-            shootInterval = round(Double(tempValue))
-            sliderLabel.text = String(format: "%.0f", shootInterval)
+            shootInterval = Int(Double(tempValue))
+            let displayString = shootInterval == 1 ? "\(shootInterval) second" : "\(shootInterval) seconds"
+            sliderLabel.text = "Shoot Interval: \(displayString)."
         }
-        
         
     }
     
+    @IBOutlet weak var clipLengthLabel: UILabel!
     @IBOutlet weak var sliderLabel: UILabel!
-    
-    @IBOutlet weak var intervalSlider: UISlider!
-    
-    
     @IBOutlet weak var framesShotLabel: UILabel!
-    
     //MARK: ClockReadout Label
     @IBOutlet weak var timerLabel: UILabel!
     
+    @IBOutlet weak var intervalSlider: UISlider!
+    
     //MARK: -- Consider renaming this Start/Stop Button
     @IBOutlet weak var timerButton: UIButton!
+    
     
     @IBAction func quickClearHit(_ sender: Any) {
         clockOne.hours = 0
@@ -106,8 +114,7 @@ class ViewController: UIViewController {
         }
         
     }
-//TODO: I want to add a "0" suffic for any time the second, minute, or hour is between 1-9... In the case of "blank" I want those to readout "00"
-    //MARK: This updates my first clock readout.
+
     func updateTimer() {
 
         clockOne.seconds += 1
@@ -133,24 +140,28 @@ class ViewController: UIViewController {
     }
     
     
-    // Updates Frames Shot Label - Basedon increment.
+    // Updates Frames Shot Label - Based on increment.
     //TODO: Need to factor in the value of Interval
     
     func updateFrames() {
 
-        framesShot += 1
-        if framesShot >= 1 {
+        intervalCounter += 1
+        
+    
+        if shootInterval < 1 {
+            framesShot += 2
+            framesShotLabel.text = "\(framesShot)"
+
+        } else if intervalCounter == shootInterval {
+            framesShot += 1
         framesShotLabel.text = "\(framesShot)"
-        } else {
-            return
+            intervalCounter = 0
         }
         
     }
 
     
     func updateLabels() {
-        
-        // This should be a computer property
         
         var seconds = (framesShot / fps)
         var minutes = seconds / 60
@@ -166,7 +177,6 @@ class ViewController: UIViewController {
             minutes = 0
         }
         
-
         let secondsString = seconds > 9 ? "\(seconds)" : "0\(seconds)"
         let minutesString = minutes > 9 ? "\(minutes)" : "0\(minutes)"
         let hoursString = hours > 9 ? "\(hours)" : "0\(hours)"
@@ -175,7 +185,6 @@ class ViewController: UIViewController {
 
     }
  
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
