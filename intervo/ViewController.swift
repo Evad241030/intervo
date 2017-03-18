@@ -6,6 +6,14 @@
 //  Copyright © 2017 David Gonzalez. All rights reserved.
 //
 
+// 1. When I set Timer (Time Priority) It should convert to a countdown timer - I should see Frames Needed and Get Estimate Clip Length Calculate.
+// 2. When I set Estimated ClipLength (clipLength Priority) - I should get CountDown Timer, and show frames needed
+// 3. How am I affecting Estimated Clip length when I dynamically change FPS - How do I know if I'm cross threads?
+// 4. How do I set values to determine Shoot Interval?
+// 5. Can this work when it is resigned to background?
+// 6. Should I set user defaults
+
+
 //TODO: I could refactor estimated clip length to create a second instance of ClockReadout.
 
 //TODO: I could branch out and make it so that You can enter desired clip length.
@@ -21,7 +29,7 @@ class ViewController: UIViewController {
 
     var timer = Timer()
     var framesShot: Int = 0 {
-        didSet {
+        willSet {
             updateLabels()
         }
     }
@@ -32,6 +40,7 @@ class ViewController: UIViewController {
     var intervalCounter: Int = 0
     var stopWatchString: String?
     var clockOne = ClockReadout()
+    var clipLength = ClockReadout()
     var startStopWatch: Bool = true
 
     
@@ -163,23 +172,23 @@ class ViewController: UIViewController {
     
     func updateLabels() {
         
-        var seconds = (framesShot / fps)
-        var minutes = seconds / 60
-        var hours = minutes / 60
+        clipLength.seconds = (framesShot / fps)
+        clipLength.minutes = clipLength.seconds / 60
+        clipLength.hours = clipLength.minutes / 60
         
-        if seconds == 60 {
-            minutes += 1
-            seconds = 0
+        if clipLength.seconds == 60 {
+            clipLength.minutes += 1
+            clipLength.seconds = 0
         }
         
-        if minutes == 60 {
-            hours += 1
-            minutes = 0
+        if clipLength.minutes == 60 {
+            clipLength.hours += 1
+            clipLength.minutes = 0
         }
         
-        let secondsString = seconds > 9 ? "\(seconds)" : "0\(seconds)"
-        let minutesString = minutes > 9 ? "\(minutes)" : "0\(minutes)"
-        let hoursString = hours > 9 ? "\(hours)" : "0\(hours)"
+        let secondsString = clipLength.seconds > 9 ? "\(clipLength.seconds)" : "0\(clipLength.seconds)"
+        let minutesString = clipLength.minutes > 9 ? "\(clipLength.minutes)" : "0\(clipLength.minutes)"
+        let hoursString = clipLength.hours > 9 ? "\(clipLength.hours)" : "0\(clipLength.hours)"
 
         clipLengthLabel.text = "\(hoursString):\(minutesString):\(secondsString)"
 
