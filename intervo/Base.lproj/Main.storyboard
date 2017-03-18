@@ -31,6 +31,9 @@
                                     <segment title="60"/>
                                     <segment title="120"/>
                                 </segments>
+                                <connections>
+                                    <action selector="changeFPS:" destination="BYZ-38-t0r" eventType="valueChanged" id="zPw-TM-ON9"/>
+                                </connections>
                             </segmentedControl>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Estimate Clip Length" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXB-hF-rSa">
                                 <rect key="frame" x="16" y="525" width="158" height="20.5"/>
@@ -122,6 +125,10 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <connections>
+                        <outlet property="clipLengthLabel" destination="aam-c4-3w5" id="A5J-OS-HNt"/>
+                        <outlet property="fpsSegmentControl" destination="rFB-Wy-9Bj" id="3sJ-h3-ufG"/>
+                        <outlet property="framesShotLabel" destination="5Lm-Na-A2K" id="4XS-nG-Uqp"/>
+                        <outlet property="intervalSlider" destination="2Zv-wJ-W4V" id="fRA-L0-4G0"/>
                         <outlet property="timerButton" destination="uRg-YF-7Yi" id="4Kf-vY-CTG"/>
                         <outlet property="timerLabel" destination="MO0-qy-0u6" id="akL-E4-evv"/>
                     </connections>
