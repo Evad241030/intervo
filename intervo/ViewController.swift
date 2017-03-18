@@ -71,15 +71,18 @@ class ViewController: UIViewController {
             print("\(fps)")
         }
     }
-    //FIX: BUG - Still display Shoot Interval is 0 seconds.
-    //FIX: BUG - After working intially, readjusting values - counter won't work
+    
     @IBAction func sliderMoved(_ sender: Any) {
+
         
         let tempValue = intervalSlider.value
+        
         if tempValue == 0.0 {
             shootInterval = Int(Double(tempValue))
             sliderLabel.text = "Shoot Interval: 0.5 seconds."
-        } else {
+        }
+        
+        if tempValue >= 1.0 {
             shootInterval = Int(Double(tempValue))
             let displayString = shootInterval == 1 ? "\(shootInterval) second" : "\(shootInterval) seconds"
             sliderLabel.text = "Shoot Interval: \(displayString)."
@@ -115,11 +118,12 @@ class ViewController: UIViewController {
             timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
             startStopWatch = false
             timerButton.setTitle("Stop Timer", for: UIControlState.normal)
-            
+            intervalSlider.isEnabled = false
         } else {
             timer.invalidate()
             timerButton.setTitle("Start Timer", for: UIControlState.normal)
             startStopWatch = true
+            intervalSlider.isEnabled = true
         }
         
     }
