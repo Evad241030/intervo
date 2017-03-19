@@ -222,38 +222,11 @@ class ViewController: UIViewController {
             clipLengthLabel.text = "\(messageString)"
         }
         
-        
-    /*
-        switch newLength {
-        case 0..<60:
-            let secondsString = newLength == 1 ? "\(newLength) second long" : "\(newLength) seconds long"
-            clipLengthLabel.text = "\(secondsString)"
-        case 60...10000:
-            let minutesString = minuteLength == 1 ? "\(minuteLength) minute long" : "\(minuteLength) minutes long"
-            clipLengthLabel.text = "\(minutesString)"
-            print("Test Seconds are: \(testSeconds)")
-        default:
-            clipLengthLabel.text = "Too Long."
-        }
-        */
-        
-
-        
-
-        
     }
- 
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
     }
-
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-
 }
 
