@@ -38,7 +38,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             updateLabels()
         }
     }
-//    var countDownFrames: Int = 0
+    var framesNeeded: Int = 0
     
     
     var timerIsOn = false
@@ -137,19 +137,49 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // MARK: - TextField Delegates
     
 
-//    func textFieldDidEndEditing(_ textField: UITextField) {
-//        
-//        // add a number counter
-//        // number counter adds to or removes from frames needed / frames label
-//        // if hours added add hours * 60 * 60
-//        // if minutes add add minutes * 60
-//        // if seconds added add seconds entered
-//        // prevent more than 60 from being entered in text fields.
-//        
-//        framesShotLabel.text = textField.text!
-//        countDownFrames = Int(textField.text!)!
-//        
-//    }
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        
+        // number counter adds to or removes from frames needed / frames label
+        // if hours added add hours * 60 * 60
+        // if minutes add add minutes * 60
+        // if seconds added add seconds entered
+        // prevent more than 60 from being entered in text fields.
+        
+        if textField == timeSecond {
+            let second = Int(textField.text!)!
+            framesNeeded += second
+            framesShotLabel.text = "\(framesNeeded)"
+        }
+        
+        if textField == timeMinute {
+            let minute = Int(textField.text!)!
+            let minutesInSeconds = minute * 60
+            framesNeeded += minutesInSeconds
+            framesShotLabel.text = "\(framesNeeded)"
+        }
+    }
+    
+    
+    // TODO: - Need to protect against unwrapping - or nil value.
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        if textField == timeSecond {
+            let second = Int(textField.text!)!
+            framesNeeded -= second
+            framesShotLabel.text = "\(framesNeeded)"
+        }
+        
+        if textField == timeMinute {
+            let minute = Int(textField.text!)!
+            let minutesInSeconds = minute * 60
+            framesNeeded -= minutesInSeconds
+            framesShotLabel.text = "\(framesNeeded)"
+        }
+        
+        
+        
+        return true
+    }
+    
     
 //    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
 //
@@ -286,6 +316,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         timeSecond.delegate = self
+        timeMinute.delegate = self
+        timeHour.delegate = self
         
     }
     
