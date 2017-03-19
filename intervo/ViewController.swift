@@ -29,16 +29,23 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITextFieldDelegate {
 
     var timer = Timer()
+//    var countDownTimer = Timer()
     var framesShot: Int = 0 {
         didSet {
             updateLabels()
         }
     }
+//    var countDownFrames: Int = 0
+    
     
     var timerIsOn = false
+//    var countdownIsOn = false
+//    var startStopCountdown = false
+    
+    
     var fps: Int = 24
     var shootInterval: Int = 1
     var intervalCounter: Int = 0
@@ -114,14 +121,50 @@ class ViewController: UIViewController {
         clipLength.hours = 0
         framesShot = 0
         
+        
         timerLabel.text = "00:00:00"
         framesShotLabel.text = "000"
     }
     
+    // MARK: TextField Outlets for Time
+    
+    // 1. Seconds
+    @IBOutlet weak var timeSecond: UITextField!
+    @IBOutlet weak var timeMinute: UITextField!
+    @IBOutlet weak var timeHour: UITextField!
+    
+    
+    // MARK: - TextField Delegates
+    
+
+//    func textFieldDidEndEditing(_ textField: UITextField) {
+//        
+//        // add a number counter
+//        // number counter adds to or removes from frames needed / frames label
+//        // if hours added add hours * 60 * 60
+//        // if minutes add add minutes * 60
+//        // if seconds added add seconds entered
+//        // prevent more than 60 from being entered in text fields.
+//        
+//        framesShotLabel.text = textField.text!
+//        countDownFrames = Int(textField.text!)!
+//        
+//    }
+    
+//    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+//
+//        countdownIsOn = true
+//        timerButton.setTitle("Start Countdown", for: UIControlState.normal)
+//        return true
+//    }
+    
+    
+
+    
     //This is the action version of my my StartStop Button. I didn't rename it to avoid the hassle.
     @IBAction func timerButtonHit(_ sender: Any) {
         
-        if startStopWatch == true {
+    if startStopWatch == true {
             timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
             
             timerButton.setTitle("Pause Timer", for: UIControlState.normal)
@@ -158,7 +201,7 @@ class ViewController: UIViewController {
     }
     
     
-    // This works with my main clock.
+    // This works with my main clock. Is called by timer.
     func updateTimer() {
 
         clockOne.seconds += 1
@@ -177,12 +220,27 @@ class ViewController: UIViewController {
         let minutesString = clockOne.minutes > 9 ? "\(clockOne.minutes)" : "0\(clockOne.minutes)"
         let hoursString = clockOne.hours > 9 ? "\(clockOne.hours)" : "0\(clockOne.hours)"
         
+        timeSecond.text = secondsString
+        timeMinute.text = minutesString
+        timeHour.text = hoursString
+        
+        
         stopWatchString = "\(hoursString):\(minutesString):\(secondsString)"
         timerLabel.text = stopWatchString
         
         updateFrames()
     }
     
+    
+//    func updateCountdown() {
+//        if countDownFrames > 0 {
+//        countDownFrames -= 1
+//            framesShotLabel.text = ("\(countDownFrames)")
+//        } else {
+//            countDownTimer.invalidate()
+//            timerButton.setTitle("Start Timer", for: UIControlState.normal)
+//        }
+//    }
     
     // Updates Frames Shot Label - Based on increment.
     func updateFrames() {
@@ -202,7 +260,7 @@ class ViewController: UIViewController {
         
     }
 
-    // Updates estimated Clip Length
+    // Updates estimated Clip Length / Called when framesShot is set.
     func updateLabels() {
         
         let finalSeconds = framesShot / fps
@@ -227,6 +285,14 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        timeSecond.delegate = self
+        
     }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
+    
 }
 
