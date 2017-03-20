@@ -139,29 +139,41 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
     func textFieldDidEndEditing(_ textField: UITextField) {
         
-        // number counter adds to or removes from frames needed / frames label
-        // if hours added add hours * 60 * 60
-        // if minutes add add minutes * 60
-        // if seconds added add seconds entered
         // prevent more than 60 from being entered in text fields.
         
         if textField == timeSecond {
-            let second = Int(textField.text!)!
-            framesNeeded += second
-            framesShotLabel.text = "\(framesNeeded)"
+            if let second = textField.text {
+            framesNeeded += Int(second)!
+                framesShotLabel.text = "\(framesNeeded)"
+            }
         }
         
         if textField == timeMinute {
-            let minute = Int(textField.text!)!
-            let minutesInSeconds = minute * 60
-            framesNeeded += minutesInSeconds
-            framesShotLabel.text = "\(framesNeeded)"
+            if let minute = textField.text {
+                let minutesInSeconds = Int(minute)! * 60
+                framesNeeded += minutesInSeconds
+                framesShotLabel.text = "\(framesNeeded)"
+            }
+            
         }
+        
+        if textField == timeHour {
+            if let hour = textField.text {
+                let hoursInSeconds = (Int(hour)! * 60) * 60
+                framesNeeded += hoursInSeconds
+                framesShotLabel.text = "\(framesNeeded)"
+        
+            }
+            
+        }
+        
+        
     }
     
     
     // TODO: - Need to protect against unwrapping - or nil value.
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        
         if textField == timeSecond {
             let second = Int(textField.text!)!
             framesNeeded -= second
@@ -175,11 +187,21 @@ class ViewController: UIViewController, UITextFieldDelegate {
             framesShotLabel.text = "\(framesNeeded)"
         }
         
-        
+        if textField == timeHour {
+            let hour = Int(textField.text!)!
+            let hoursInSeconds = (hour * 60) * 60
+            framesNeeded -= hoursInSeconds
+            framesShotLabel.text = "\(framesNeeded)"
+        }
         
         return true
     }
     
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+
+        
+        return true
+    }
     
 //    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
 //
