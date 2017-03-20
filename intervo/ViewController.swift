@@ -139,7 +139,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
     func textFieldDidEndEditing(_ textField: UITextField) {
         
-        // prevent more than 60 from being entered in text fields.
+        // FIX: prevent more than 60 from being entered in text fields.
+        // FIX: prevent user from leave text field blank.
         
         if textField == timeSecond {
             if let second = textField.text {
@@ -162,17 +163,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 let hoursInSeconds = (Int(hour)! * 60) * 60
                 framesNeeded += hoursInSeconds
                 framesShotLabel.text = "\(framesNeeded)"
-        
             }
-            
         }
         
         
     }
     
-    
-    // TODO: - Need to protect against unwrapping - or nil value.
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+
         
         if textField == timeSecond {
             let second = Int(textField.text!)!
@@ -195,6 +193,20 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
         
         return true
+    }
+    
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let characterCountLimit = 2
+        
+        let startingLength = textField.text?.characters.count ?? 0
+        let lengthToAdd = string.characters.count
+        let lengthToReplace = range.length
+        
+        let newLength = startingLength + lengthToAdd - lengthToReplace
+        
+        return newLength <= characterCountLimit
+        
     }
     
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
