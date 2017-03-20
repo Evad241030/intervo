@@ -6,6 +6,10 @@
 //  Copyright © 2017 David Gonzalez. All rights reserved.
 //
 
+
+
+// MAIN PROBLEM! I NEED TO ZERO OUT VALUES ACCUMLATED WHEN TIMER IS INTIATED BEFORE I jump into countdown mode.
+
 // 1. When I set Timer (Time Priority) It should convert to a countdown timer - I should see Frames Needed and Get Estimate Clip Length Calculate.
 // 2. When I set Estimated ClipLength (clipLength Priority) - I should get CountDown Timer, and show frames needed
 // 3. How am I affecting Estimated Clip length when I dynamically change FPS - How do I know if I'm cross threads?
@@ -166,9 +170,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
             
             countDownTimer.invalidate()
             
-            timerButton.setTitle("Start Countdown", for: UIControlState.normal)
+            StartCountdown.setTitle("Start Countdown", for: UIControlState.normal)
             
             countdownIsOn = false
+            
+            startStopCountdown = true
             
             disableToggle()
         }
@@ -209,11 +215,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - TextField Delegates
 
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
         
         // FIX: prevent more than 60 from being entered in text fields.
         // FIX: prevent user from leave text field blank.
-
         
         if textField == timeSecond {
             if let second = textField.text {
@@ -246,7 +252,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-
+        
         startStopCountdown = true
         timerButton.isEnabled = false
         StartCountdown.isEnabled = true
