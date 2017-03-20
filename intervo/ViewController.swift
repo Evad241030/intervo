@@ -12,6 +12,9 @@
 // 4. How do I set values to determine Shoot Interval?
 // 5. Can this work when it is resigned to background?
 // 6. Should I set user defaults - It would be nice for the user to always have a standard timelapse they want to start at and configure later.
+
+
+
 // 7. What if I did a countdown start button?
 //8. Format Frames Counting with commas.
 //FIX: Need to disable Segmented Control - as it does not change when the timer is stopped.
@@ -32,7 +35,7 @@ import UIKit
 class ViewController: UIViewController, UITextFieldDelegate {
 
     var timer = Timer()
-//    var countDownTimer = Timer()
+    var countDownTimer = Timer()
     var framesShot: Int = 0 {
         didSet {
             updateLabels()
@@ -42,8 +45,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     
     var timerIsOn = false
-//    var countdownIsOn = false
-//    var startStopCountdown = false
+    var countdownIsOn = false
     
     
     var fps: Int = 24
@@ -53,6 +55,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var clockOne = ClockReadout()
     var clipLength = ClockReadout()
     var startStopWatch: Bool = true
+    var startStopCountdown: Bool = false
     
     @IBOutlet weak var fpsSegmentControl: UISegmentedControl!
 
@@ -106,9 +109,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var intervalSlider: UISlider!
     
-    //MARK: -- Consider renaming this Start/Stop Button
+    //MARK: - Consider renaming this Start/Stop Button
     @IBOutlet weak var timerButton: UIButton!
     
+    // MARK: - QUICK CLEAR
     
     @IBOutlet weak var quickClear: UIButton!
     @IBAction func quickClearHit(_ sender: Any) {
@@ -121,9 +125,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
         clipLength.hours = 0
         framesShot = 0
         
-        
         timerLabel.text = "00:00:00"
         framesShotLabel.text = "000"
+        timerButton.isEnabled = true
+        StartCountdown.isEnabled = false
+        
+        timeSecond.text = "00"
+        timeMinute.text = "00"
+        timeMinute.text = "00"
+        
+        countdownIsOn = false
+        
     }
     
     // MARK: TextField Outlets for Time
@@ -133,20 +145,84 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var timeMinute: UITextField!
     @IBOutlet weak var timeHour: UITextField!
     
+    // MARK: - Start Countdown
+    
+    @IBOutlet weak var StartCountdown: UIButton!
+    
+    @IBAction func startCountdownHit(_ sender: UIButton) {
+        
+        if startStopCountdown == true {
+            countDownTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateCountdown)), userInfo: nil, repeats: true)
+            
+            StartCountdown.setTitle("Pause Countdown", for: UIControlState.normal)
+            
+            startStopCountdown = false
+            //CountdownIsOn helps be disable Toggle()
+            countdownIsOn = true
+            
+            disableToggle()
+            
+        } else {
+            
+            countDownTimer.invalidate()
+            
+            timerButton.setTitle("Start Countdown", for: UIControlState.normal)
+            
+            countdownIsOn = false
+            
+            disableToggle()
+        }
+        
+    }
+    
+    func updateCountdown() {
+        
+        
+        
+//        clockOne.seconds += 1
+//        
+//        if clockOne.seconds == 60 {
+//            clockOne.minutes += 1
+//            clockOne.seconds = 0
+//        }
+//        
+//        if clockOne.minutes == 60 {
+//            clockOne.hours += 1
+//            clockOne.minutes = 0
+//        }
+//        
+//        let secondsString = clockOne.seconds > 9 ? "\(clockOne.seconds)" : "0\(clockOne.seconds)"
+//        let minutesString = clockOne.minutes > 9 ? "\(clockOne.minutes)" : "0\(clockOne.minutes)"
+//        let hoursString = clockOne.hours > 9 ? "\(clockOne.hours)" : "0\(clockOne.hours)"
+//        
+//        timeSecond.text = secondsString
+//        timeMinute.text = minutesString
+//        timeHour.text = hoursString
+//        
+//        
+//        stopWatchString = "\(hoursString):\(minutesString):\(secondsString)"
+//        timerLabel.text = stopWatchString
+//        
+//        updateFrames()
+        
+    }
     
     // MARK: - TextField Delegates
-    
 
     func textFieldDidEndEditing(_ textField: UITextField) {
         
         // FIX: prevent more than 60 from being entered in text fields.
         // FIX: prevent user from leave text field blank.
+
         
         if textField == timeSecond {
             if let second = textField.text {
             framesNeeded += Int(second)!
-                framesShotLabel.text = "\(framesNeeded)"
+            framesShotLabel.text = "\(framesNeeded)"
             }
+            
+            return
+            
         }
         
         if textField == timeMinute {
@@ -171,6 +247,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
 
+        startStopCountdown = true
+        timerButton.isEnabled = false
+        StartCountdown.isEnabled = true
+        
         
         if textField == timeSecond {
             let second = Int(textField.text!)!
@@ -223,8 +303,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
 //    }
     
     
-
-    
     //This is the action version of my my StartStop Button. I didn't rename it to avoid the hassle.
     @IBAction func timerButtonHit(_ sender: Any) {
         
@@ -254,6 +332,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
     // Turn on or off any features when timer is running or when time is not running.
     func disableToggle() {
+        
         if timerIsOn {
             intervalSlider.isEnabled = false
             quickClear.isEnabled = false
@@ -261,7 +340,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
             intervalSlider.isEnabled = true
             quickClear.isEnabled = true
         }
-
+        
+        if countdownIsOn {
+            intervalSlider.isEnabled = false
+            quickClear.isEnabled = false
+        } else {
+            intervalSlider.isEnabled = true
+            quickClear.isEnabled = true
+        }
+        
     }
     
     
@@ -352,6 +439,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
         timeSecond.delegate = self
         timeMinute.delegate = self
         timeHour.delegate = self
+        StartCountdown.isEnabled = false
+        
         
     }
     

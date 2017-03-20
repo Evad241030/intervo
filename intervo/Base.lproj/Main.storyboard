@@ -128,10 +128,19 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" keyboardType="numberPad"/>
                             </textField>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zwQ-Vv-qlb">
+                                <rect key="frame" x="16" y="350" width="343" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Start Countdown"/>
+                                <connections>
+                                    <action selector="startCountdownHit:" destination="BYZ-38-t0r" eventType="touchUpInside" id="CAV-dr-T6Z"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <connections>
+                        <outlet property="StartCountdown" destination="zwQ-Vv-qlb" id="Np9-nN-cFL"/>
                         <outlet property="clipLengthLabel" destination="aam-c4-3w5" id="A5J-OS-HNt"/>
                         <outlet property="fpsSegmentControl" destination="rFB-Wy-9Bj" id="3sJ-h3-ufG"/>
                         <outlet property="framesShotLabel" destination="5Lm-Na-A2K" id="4XS-nG-Uqp"/>
