@@ -54,7 +54,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // MARK: - Countdown vars
     var countDownTimer = Timer()
     var countdownIsOn = false
-    var framesNeeded: Int = 0
+    var framesNeeded: Int = 0 {
+        didSet {
+            updateLabels()
+        }
+    }
+    var frameInterval: Int = 0
+    var holdSecond: Int = 0
     var startStopCountdown: Bool = false
     var countDownOne = ClockReadout()
     
@@ -173,36 +179,45 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func updateCountdown() {
         
-//        clockOne.seconds += 1
-//        
-//        if clockOne.seconds == 60 {
-//            clockOne.minutes += 1
-//            clockOne.seconds = 0
-//        }
-//        
-//        if clockOne.minutes == 60 {
-//            clockOne.hours += 1
-//            clockOne.minutes = 0
-//        }
-//        
-//        let secondsString = clockOne.seconds > 9 ? "\(clockOne.seconds)" : "0\(clockOne.seconds)"
-//        let minutesString = clockOne.minutes > 9 ? "\(clockOne.minutes)" : "0\(clockOne.minutes)"
-//        let hoursString = clockOne.hours > 9 ? "\(clockOne.hours)" : "0\(clockOne.hours)"
-//        
+        frameInterval += 1
+// FRAMES Decrement based on frame interval and time
+        if frameInterval == shootInterval {
+            if framesNeeded >= 1 {
+                framesNeeded -= 1
+                framesShotLabel.text = "\(framesNeeded)"
+                frameInterval = 0
+            } else {
+                countDownTimer.invalidate()
+            }
+            
+        }
+    
+        // Time decrements - in real time... based on seconds only....!!!!!
+        holdSecond -= 1
+        timeSecond.text = "\(holdSecond)"
+        let x: Int = framesNeeded
+        
+        print("Estimate time Needed \(x)")
+        
+//        let secondsString = countDownOne.seconds > 9 ? "\(countDownOne.seconds)" : "0\(countDownOne.seconds)"
+//        let minutesString = countDownOne.minutes > 9 ? "\(countDownOne.minutes)" : "0\(countDownOne.minutes)"
+//        let hoursString = countDownOne.hours > 9 ? "\(countDownOne.hours)" : "0\(countDownOne.hours)"
+//
 //        timeSecond.text = secondsString
 //        timeMinute.text = minutesString
 //        timeHour.text = hoursString
-//        
-//        
+
 //        stopWatchString = "\(hoursString):\(minutesString):\(secondsString)"
 //        timerLabel.text = stopWatchString
 //        
 //        updateFrames()
-        
+
     }
     
     // MARK: - TextField Delegate Methods
     // This adds the user's new value for text field.
+    
+
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         
@@ -210,13 +225,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         // FIX: prevent more than 60 from being entered in text fields.
         // FIX: prevent user from leave text field blank.
-        
+        // This nil coalesing now prevents my crash... I still need to assing a 00 value for countown seconds - maybe this needs to fire off update labels. So it's a did set off of frames needed - with a call to update labels.
         if textField == timeSecond {
             
             if let second = textField.text {
-            framesNeeded += Int(second)! / shootInterval
-            countDownOne.seconds += Int(second)!
-            framesShotLabel.text = "\(framesNeeded)"
+                holdSecond = Int(second) ?? 0
+            framesNeeded += holdSecond / shootInterval
+            timeSecond.text = "\(holdSecond)"
+                framesShotLabel.text = "\(framesNeeded)"
             }
             
         }
@@ -241,8 +257,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
     }
     
-    
-    
     // Clears out user's entry - but does not clear out previous number if app time is run first. This throws off evertyhing from then on.
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
@@ -255,6 +269,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
         timerButton.isEnabled = false
         StartCountdown.isEnabled = true
         textField.clearsOnBeginEditing = true
+        clockOne.seconds = 00
+        clockOne.minutes = 00
+        clockOne.hours = 00
+        framesShot = 0
+
         
         if textField == timeSecond {
             let second = Int(textField.text!)!
@@ -412,6 +431,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
             let messageString = finalHours == 1 ? "\(finalHours) Hr, \(remainderMinutes) Min., \(remainderSeconds) Sec." : "\(finalHours) Hrs, \(remainderMinutes) Min., \(remainderSeconds) Sec."
             clipLengthLabel.text = "\(messageString)"
         }
+
+        
+        
         
     }
 
