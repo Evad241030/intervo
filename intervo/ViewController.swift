@@ -217,8 +217,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // MARK: - TextField Delegate Methods
     // This adds the user's new value for text field.
     
-
-    
     func textFieldDidEndEditing(_ textField: UITextField) {
         
         startStopCountdown = true
@@ -261,27 +259,37 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         
-        timer.invalidate()
-        timerButton.setTitle("Start Timer", for: UIControlState.normal)
-        startStopWatch = true
-        timerIsOn = false
-        countDownTimer.invalidate()
-        timerButton.isEnabled = false
-        StartCountdown.isEnabled = true
-        textField.clearsOnBeginEditing = true
-        clockOne.seconds = 00
-        clockOne.minutes = 00
-        clockOne.hours = 00
-        framesShot = 0
-
+        if framesShotLabel.text != "000" {
+            timeSecond.text = "00"
+            // I don't need this when I start editing text field on countdown...
+            // But I do need this if I run timer then switch to Countown and there is still a value in timer....
+            timeMinute.text = "00"
+            timeMinute.text = "00"
+        }
         
+            timer.invalidate()
+            startStopWatch = true
+            timerButton.setTitle("Start Timer", for: UIControlState.normal)
+            timerButton.isEnabled = false
+            timerIsOn = false
+            clockOne.seconds = 0
+            clockOne.minutes = 0
+            clockOne.hours = 0
+            framesShot = 0
+            framesNeeded = 0
+            countDownTimer.invalidate()
+            StartCountdown.isEnabled = true
+
+
         if textField == timeSecond {
+            textField.clearsOnBeginEditing = true
             let second = Int(textField.text!)!
             framesNeeded -= second
             framesShotLabel.text = "\(framesNeeded)"
         }
         
         if textField == timeMinute {
+            textField.clearsOnBeginEditing = true
             let minute = Int(textField.text!)!
             let minutesInSeconds = minute * 60
             framesNeeded -= minutesInSeconds
@@ -289,6 +297,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
         
         if textField == timeHour {
+            textField.clearsOnBeginEditing = true
             let hour = Int(textField.text!)!
             let hoursInSeconds = (hour * 60) * 60
             framesNeeded -= hoursInSeconds
@@ -412,7 +421,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
     }
 
-    // Updates estimated Clip Length / Called when framesShot is set.
+    // Updates estimated Clip Length / Called when framesShot or Frames Needed is set.
     func updateLabels() {
         
         let finalSeconds = framesShot / fps
@@ -432,8 +441,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             clipLengthLabel.text = "\(messageString)"
         }
 
-        
-        
+        framesShotLabel.text = "000"
         
     }
 
@@ -441,6 +449,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var quickClear: UIButton!
     @IBAction func quickClearHit(_ sender: Any) {
+        
+        cleanUp()
+
+        
+    }
+    
+    func cleanUp() {
+        
         clockOne.hours = 0
         clockOne.minutes = 0
         clockOne.seconds = 0
@@ -449,9 +465,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
         clipLength.seconds = 0
         clipLength.hours = 0
         framesShot = 0
+        framesNeeded = 0
         
         timerLabel.text = "00:00:00"
         framesShotLabel.text = "000"
+        
+        // Do I really want the following two lines?
         timerButton.isEnabled = true
         StartCountdown.isEnabled = false
         
@@ -462,6 +481,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
         countdownIsOn = false
         
     }
+    
+    
     
     // Turn on or off any features when timer is running or when time is not running.
     func disableToggle() {
