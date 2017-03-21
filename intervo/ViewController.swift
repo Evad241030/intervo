@@ -129,7 +129,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var sliderLabel: UILabel!
     @IBOutlet weak var framesShotLabel: UILabel!
     //MARK: ClockReadout Label
-    @IBOutlet weak var timerLabel: UILabel!
+
     
     @IBOutlet weak var intervalSlider: UISlider!
     
@@ -208,7 +208,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
 //        timeHour.text = hoursString
 
 //        stopWatchString = "\(hoursString):\(minutesString):\(secondsString)"
-//        timerLabel.text = stopWatchString
+
 //        
 //        updateFrames()
 
@@ -385,10 +385,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         timeMinute.text = minutesString
         timeHour.text = hoursString
         
-        
-        stopWatchString = "\(hoursString):\(minutesString):\(secondsString)"
-        timerLabel.text = stopWatchString
-        
         updateFrames()
     }
     
@@ -467,7 +463,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         framesShot = 0
         framesNeeded = 0
         
-        timerLabel.text = "00:00:00"
         framesShotLabel.text = "000"
         
         // Do I really want the following two lines?
