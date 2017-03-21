@@ -36,7 +36,7 @@
                                 </connections>
                             </segmentedControl>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Estimate Clip Length" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXB-hF-rSa">
-                                <rect key="frame" x="16" y="558" width="158" height="20.5"/>
+                                <rect key="frame" x="16" y="463" width="158" height="20.5"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
@@ -61,20 +61,6 @@
                                 <rect key="frame" x="16" y="120" width="343" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="00:00:00" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MO0-qy-0u6">
-                                <rect key="frame" x="16" y="494" width="343" height="56"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="35"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="00:00:00" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aam-c4-3w5">
-                                <rect key="frame" x="16" y="581" width="343" height="56"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -136,12 +122,27 @@
                                     <action selector="startCountdownHit:" destination="BYZ-38-t0r" eventType="touchUpInside" id="CAV-dr-T6Z"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="00:00:00" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aam-c4-3w5">
+                                <rect key="frame" x="16" y="491" width="343" height="56"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="3Fc-MO-ePO">
+                                <rect key="frame" x="237" y="389" width="51" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="countDownSwitchHit:" destination="BYZ-38-t0r" eventType="valueChanged" id="slk-si-a7x"/>
+                                </connections>
+                            </switch>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </view>
                     <connections>
                         <outlet property="StartCountdown" destination="zwQ-Vv-qlb" id="Np9-nN-cFL"/>
                         <outlet property="clipLengthLabel" destination="aam-c4-3w5" id="A5J-OS-HNt"/>
+                        <outlet property="countDownSwitch" destination="3Fc-MO-ePO" id="1f7-20-yKq"/>
                         <outlet property="fpsSegmentControl" destination="rFB-Wy-9Bj" id="3sJ-h3-ufG"/>
                         <outlet property="framesShotLabel" destination="5Lm-Na-A2K" id="4XS-nG-Uqp"/>
                         <outlet property="intervalSlider" destination="2Zv-wJ-W4V" id="fRA-L0-4G0"/>
@@ -151,7 +152,6 @@
                         <outlet property="timeMinute" destination="Bv6-A3-drM" id="fl3-5z-KV0"/>
                         <outlet property="timeSecond" destination="Y8I-uS-91I" id="EeQ-8K-RMW"/>
                         <outlet property="timerButton" destination="uRg-YF-7Yi" id="4Kf-vY-CTG"/>
-                        <outlet property="timerLabel" destination="MO0-qy-0u6" id="akL-E4-evv"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

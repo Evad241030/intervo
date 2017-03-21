@@ -6,30 +6,22 @@
 //  Copyright © 2017 David Gonzalez. All rights reserved.
 //
 
+// 1. When I set Estimated ClipLength (clipLength Priority) - I should get CountDown Timer, and show frames needed - May not want to do this after all - too much work.
+// 2. How am I affecting Estimated Clip length when I dynamically change FPS - How do I know if I'm cross threads?
+// 3. How do I set values to determine Shoot Interval?
+// 4. Can this work when it is resigned to background?
+// 5. Should I set user defaults - It would be nice for the user to always have a standard timelapse they want to start at and configure later.
 
-
-// MAIN PROBLEM! I NEED TO ZERO OUT VALUES ACCUMLATED WHEN TIMER IS INTIATED BEFORE I jump into countdown mode.
-
-// 1. When I set Timer (Time Priority) It should convert to a countdown timer - I should see Frames Needed and Get Estimate Clip Length Calculate.
-// 2. When I set Estimated ClipLength (clipLength Priority) - I should get CountDown Timer, and show frames needed
-// 3. How am I affecting Estimated Clip length when I dynamically change FPS - How do I know if I'm cross threads?
-// 4. How do I set values to determine Shoot Interval?
-// 5. Can this work when it is resigned to background?
-// 6. Should I set user defaults - It would be nice for the user to always have a standard timelapse they want to start at and configure later.
-// 7. What if I did a countdown start button?
-//8. Format Frames Counting with commas.
+//6. Format Frames Counting with commas.
 
 //FIX: Need to disable Segmented Control - as it does not change when the timer is stopped.
+//FIX: Need to make fps selected affected calculation when countdown is paused. or before countdown starts.
 
 //TOD0: Set inital frame to 1, or in the case of .5 to 2 since you should if you set your timer simultaneous to clicking your shutter, you start with at least 1 shot.
 
 //TODO: I could refactor estimated clip length to create a second instance of ClockReadout.
 
 //TODO: I could branch out and make it so that You can enter desired clip length.
-
-//TODO: I could created another branch to enter available time / And instead of counting time up - it counts down time.
-
-//TODO: If all those things are going well, then I can try to make it so that Frames Shot allows for the user to enter.
 
 import UIKit
 
@@ -47,6 +39,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var startStopWatch: Bool = true
     var timerIsOn = false
     var shootInterval: Int = 1
+    
+    // Maybe Clear???
     var intervalCounter: Int = 0
     var stopWatchString: String?
     var clockOne = ClockReadout()
@@ -56,11 +50,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var countdownIsOn = false
     var framesNeeded: Int = 0 {
         didSet {
-            updateLabels()
+            updateCountDownLabels()
         }
     }
+    
+    //Mabe Clear
     var frameInterval: Int = 0
     var holdSecond: Int = 0
+    
+    
     var startStopCountdown: Bool = false
     var countDownOne = ClockReadout()
     
@@ -133,6 +131,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var intervalSlider: UISlider!
     
+    @IBOutlet weak var countDownSwitch: UISwitch!
+    
+    
+    
     //MARK: - Consider renaming this Start/Stop Button
     @IBOutlet weak var timerButton: UIButton!
     
@@ -145,6 +147,27 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var timeHour: UITextField!
     
     // MARK: - Start Countdown
+    
+    @IBAction func countDownSwitchHit(_ sender: UISwitch) {
+        
+        if countDownSwitch.isOn {
+            timer.invalidate()
+            timerIsOn = false
+            cleanUp()
+            timerButton.isEnabled = false
+            StartCountdown.isEnabled = true
+            startStopCountdown = true
+        } else {
+            startStopWatch = true
+            timerButton.isEnabled = true
+            StartCountdown.isEnabled = false
+            cleanUp()
+            startStopCountdown = false
+            countDownTimer.invalidate()
+            countdownIsOn = false
+        }
+        
+    }
     
     @IBOutlet weak var StartCountdown: UIButton!
     
@@ -187,17 +210,22 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 framesShotLabel.text = "\(framesNeeded)"
                 frameInterval = 0
             } else {
+                // TODO: Why do I invalidate count down timer here?
                 countDownTimer.invalidate()
             }
             
         }
     
-        // Time decrements - in real time... based on seconds only....!!!!!
-        holdSecond -= 1
-        timeSecond.text = "\(holdSecond)"
-        let x: Int = framesNeeded
+        // FIX: Time decrements - in real time... based on seconds only....!!!!!
         
-        print("Estimate time Needed \(x)")
+        if holdSecond > 0 {
+            holdSecond -= 1
+            timeSecond.text = "\(holdSecond)"
+        }
+        
+//        let x: Int = framesNeeded
+//        
+//        print("Estimate time Needed \(x)")
         
 //        let secondsString = countDownOne.seconds > 9 ? "\(countDownOne.seconds)" : "0\(countDownOne.seconds)"
 //        let minutesString = countDownOne.minutes > 9 ? "\(countDownOne.minutes)" : "0\(countDownOne.minutes)"
@@ -219,7 +247,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         
-        startStopCountdown = true
+        if countdownIsOn == false {
+            startStopCountdown = true
+            countdownIsOn = true
+            StartCountdown.setTitle("Resume Countdown", for: .normal)
+        }
         
         // FIX: prevent more than 60 from being entered in text fields.
         // FIX: prevent user from leave text field blank.
@@ -259,28 +291,20 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         
-        if framesShotLabel.text != "000" {
-            timeSecond.text = "00"
-            // I don't need this when I start editing text field on countdown...
-            // But I do need this if I run timer then switch to Countown and there is still a value in timer....
-            timeMinute.text = "00"
-            timeMinute.text = "00"
+//        framesShot = 0
+
+        if countdownIsOn == true {
+            countDownTimer.invalidate()
+            countdownIsOn = false
+            StartCountdown.setTitle("Resume Countdown", for: .normal)
         }
         
-            timer.invalidate()
-            startStopWatch = true
-            timerButton.setTitle("Start Timer", for: UIControlState.normal)
-            timerButton.isEnabled = false
-            timerIsOn = false
-            clockOne.seconds = 0
-            clockOne.minutes = 0
-            clockOne.hours = 0
-            framesShot = 0
-            framesNeeded = 0
-            countDownTimer.invalidate()
-            StartCountdown.isEnabled = true
-
-
+        // Instead of this - I should be pausing the countown by force....
+//        if StartCountdown.titleLabel?.text == "Pause Countdown" {
+//            StartCountdown.setTitle("Start Countdown", for: .normal)
+//            startStopCountdown = true
+//        }
+        
         if textField == timeSecond {
             textField.clearsOnBeginEditing = true
             let second = Int(textField.text!)!
@@ -417,7 +441,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
     }
 
-    // Updates estimated Clip Length / Called when framesShot or Frames Needed is set.
+    // Updates estimated Clip Length / Called when framesShot is set.
     func updateLabels() {
         
         let finalSeconds = framesShot / fps
@@ -436,11 +460,34 @@ class ViewController: UIViewController, UITextFieldDelegate {
             let messageString = finalHours == 1 ? "\(finalHours) Hr, \(remainderMinutes) Min., \(remainderSeconds) Sec." : "\(finalHours) Hrs, \(remainderMinutes) Min., \(remainderSeconds) Sec."
             clipLengthLabel.text = "\(messageString)"
         }
-
-        framesShotLabel.text = "000"
         
     }
 
+    
+    // Need to calculate this for countdown
+    func updateCountDownLabels() {
+        return
+//        let finalSeconds = framesShot / fps
+//        let finalMinutes = finalSeconds / 60
+//        let finalHours = finalMinutes / 60
+//        let remainderSeconds = finalSeconds - (finalMinutes * 60)
+//        let remainderMinutes = finalMinutes - (finalHours * 60)
+//        
+//        if finalSeconds < 60 {
+//            let messageString = "\(finalSeconds) Sec."
+//            clipLengthLabel.text = "\(messageString)"
+//        } else if finalMinutes < 60 {
+//            let messageString = "\(finalMinutes) Min., \(remainderSeconds) Sec."
+//            clipLengthLabel.text = "\(messageString)"
+//        } else {
+//            let messageString = finalHours == 1 ? "\(finalHours) Hr, \(remainderMinutes) Min., \(remainderSeconds) Sec." : "\(finalHours) Hrs, \(remainderMinutes) Min., \(remainderSeconds) Sec."
+//            clipLengthLabel.text = "\(messageString)"
+//        }
+        
+    }
+    
+    
+    
     // MARK: - QUICK CLEAR
     
     @IBOutlet weak var quickClear: UIButton!
@@ -460,18 +507,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
         clipLength.minutes = 0
         clipLength.seconds = 0
         clipLength.hours = 0
+        
         framesShot = 0
         framesNeeded = 0
         
         framesShotLabel.text = "000"
         
-        // Do I really want the following two lines?
-        timerButton.isEnabled = true
-        StartCountdown.isEnabled = false
-        
         timeSecond.text = "00"
         timeMinute.text = "00"
-        timeMinute.text = "00"
+        timeHour.text = "00"
         
         countdownIsOn = false
         
