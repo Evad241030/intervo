@@ -54,10 +54,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
     }
     
-    //Mabe Clear
+    //FIX: - Mabe Clear FOR SURE
     var frameInterval: Int = 0
     var holdSecond: Int = 0
-    
+    // These variable hold seconds not minutes. I need to deconstruct these when used.
+    var holdMinute: Int = 0
+    var holdHour: Int = 0
     
     var startStopCountdown: Bool = false
     var countDownOne = ClockReadout()
@@ -245,6 +247,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // MARK: - TextField Delegate Methods
     // This adds the user's new value for text field.
     
+    
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
         
         if countdownIsOn == false {
@@ -256,78 +260,119 @@ class ViewController: UIViewController, UITextFieldDelegate {
         // FIX: prevent more than 60 from being entered in text fields.
         // FIX: prevent user from leave text field blank.
         // This nil coalesing now prevents my crash... I still need to assing a 00 value for countown seconds - maybe this needs to fire off update labels. So it's a did set off of frames needed - with a call to update labels.
+        
+        //TODO: - NILLLY
         if textField == timeSecond {
-            
+    
             if let second = textField.text {
                 holdSecond = Int(second) ?? 0
             framesNeeded += holdSecond / shootInterval
             timeSecond.text = "\(holdSecond)"
                 framesShotLabel.text = "\(framesNeeded)"
+                StartCountdown.setTitle("Resume Countdown", for: .normal)
+            } else {
+                timeSecond.text = "99"
             }
             
         }
         
         if textField == timeMinute {
+            
             if let minute = textField.text {
-                let minutesInSeconds = Int(minute)! * 60
-                framesNeeded += minutesInSeconds
+                holdMinute = Int(minute) ?? 0
+                framesNeeded += holdMinute * 60 / shootInterval
                 framesShotLabel.text = "\(framesNeeded)"
+                StartCountdown.setTitle("Resume Countdown", for: .normal)
+
             }
             
         }
         
         if textField == timeHour {
+            
             if let hour = textField.text {
-                let hoursInSeconds = (Int(hour)! * 60) * 60
-                framesNeeded += hoursInSeconds
+                holdHour = Int(hour) ?? 0
+                framesNeeded += (holdHour * 60) * 60 / shootInterval
                 framesShotLabel.text = "\(framesNeeded)"
+                StartCountdown.setTitle("Resume Countdown", for: .normal)
+
             }
         }
         
         
     }
     
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        if textField == timeHour {
+            timeMinute.becomeFirstResponder()
+        } else if textField == timeMinute {
+            timeSecond.becomeFirstResponder()
+        } else {
+            textField.resignFirstResponder()
+        }
+        
+        
+        return true
+    }
+    
     // Clears out user's entry - but does not clear out previous number if app time is run first. This throws off evertyhing from then on.
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         
-//        framesShot = 0
+        
+        if countDownSwitch.isOn == false {
+            return false
+        } else {
+            
+        textField.clearsOnBeginEditing = true
 
+            // For times when countdown is in progress - and I've re-entered into a text field
+            
         if countdownIsOn == true {
             countDownTimer.invalidate()
             countdownIsOn = false
-            StartCountdown.setTitle("Resume Countdown", for: .normal)
+            StartCountdown.setTitle("Countdown Paused", for: .normal)
         }
-        
+
         // Instead of this - I should be pausing the countown by force....
 //        if StartCountdown.titleLabel?.text == "Pause Countdown" {
 //            StartCountdown.setTitle("Start Countdown", for: .normal)
 //            startStopCountdown = true
 //        }
-        
+
+            
         if textField == timeSecond {
-            textField.clearsOnBeginEditing = true
-            let second = Int(textField.text!)!
-            framesNeeded -= second
-            framesShotLabel.text = "\(framesNeeded)"
+            var tempSecond: Int = 0
+            if let secondText = textField.text {
+                tempSecond = Int(secondText) ?? 0
+                framesNeeded -= tempSecond
+//                framesShotLabel.text = "\(framesNeeded)"
+            }
+            
         }
         
         if textField == timeMinute {
-            textField.clearsOnBeginEditing = true
-            let minute = Int(textField.text!)!
-            let minutesInSeconds = minute * 60
-            framesNeeded -= minutesInSeconds
-            framesShotLabel.text = "\(framesNeeded)"
+            var tempMinute: Int = 0
+            if let minuteText = textField.text {
+                tempMinute = Int(minuteText) ?? 0
+                framesNeeded -= tempMinute * 60
+            }
+
+//            framesShotLabel.text = "\(framesNeeded)"
         }
         
         if textField == timeHour {
-            textField.clearsOnBeginEditing = true
-            let hour = Int(textField.text!)!
-            let hoursInSeconds = (hour * 60) * 60
-            framesNeeded -= hoursInSeconds
-            framesShotLabel.text = "\(framesNeeded)"
+            var tempHour: Int = 0
+            if let hourText = textField.text {
+                tempHour = Int(hourText) ?? 0
+                framesNeeded -= (tempHour * 60) * 60
+            }
+//            framesShotLabel.text = "\(framesNeeded)"
         }
-        
+        }
+            
         return true
     }
     
@@ -463,7 +508,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
     }
 
-    
     // Need to calculate this for countdown
     func updateCountDownLabels() {
         return
