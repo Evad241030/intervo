@@ -50,11 +50,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // MARK: - Countdown vars
     var countDownTimer = Timer()
     var countdownIsOn = false
-    var framesNeeded: Int = 0 {
-        didSet {
-            updateCountDownLabels()
-        }
-    }
+    var framesNeeded: Int = 0
+        
+//        {
+//        didSet {
+//            updateCountDownLabels()
+//        }
+//    }
     
     //FIX: - Mabe Clear FOR SURE
     var frameInterval: Int = 0
@@ -65,6 +67,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     var startStopCountdown: Bool = false
     var countDownOne = ClockReadout()
+    var newClipLength: Double = 0.0
     
     // MARK: Shared Global Vars
     var clipLength = ClockReadout()
@@ -213,6 +216,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 framesNeeded -= 1
                 framesShotLabel.text = "\(framesNeeded)"
                 frameInterval = 0
+                updateCountDownLabels()
             } else {
                 // TODO: Why do I invalidate count down timer here?
                 countDownTimer.invalidate()
@@ -497,33 +501,51 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
     // Need to calculate this for countdown
     func updateCountDownLabels() {
-        // The total initial frames should be recorded.
-        // This should estimate how long this would be as a final length...
-        // The final length goes up - as countdown goes down. - 
-        // In effect, I'll know my current final length - even if I still have frames to shoot.
         
+        
+        // FIX Need a place to zero out new clip length
+        newClipLength += 1.0
+        
+        let finalSeconds = newClipLength / Double(fps)
+        let finalMinutes = finalSeconds / 60.0
+        let finalHours = finalMinutes / 60.0
+        let remainderSeconds = Int(finalSeconds) - (Int(finalMinutes) * 60)
+        let remainderMinutes = Int(finalMinutes) - ((Int(finalHours) * 60) * 60)
+        
+        
+        if finalSeconds < 60.0 {
+            let messageString = Int(finalSeconds)
+            clipLengthLabel.text = ":\(messageString) Sec."
+        } else if finalMinutes < 60.0 {
+            let messageString = Int(finalMinutes)
+            clipLengthLabel.text = "\(messageString) Min., :\(remainderSeconds) Sec."
+        } else {
+            let messageString = Int(finalHours)
+            clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+        }
+        
+        
+        /*
+        let finalSeconds = countDownTally
+        let finalMinutes = finalSeconds / 60
+        let finalHours = finalMinutes / 60
+        let remainderSeconds = finalSeconds - (finalMinutes * 60)
+        let remainderMinutes = finalMinutes - (finalHours * 60)
+//
+        if finalSeconds < 60.0 {
+            let messageString = Int(finalSeconds)
+            clipLengthLabel.text = ":\(messageString) Sec."
+        } else if finalMinutes < 60.0 {
+            let messageString = Int(finalMinutes)
+            clipLengthLabel.text = "\(messageString) Min., :\(remainderSeconds) Sec."
+        } else {
+            let messageString = Int(finalHours)
+            clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+        }
+        */
         
         return
-//        let finalSeconds = framesShot / fps
-//        let finalMinutes = finalSeconds / 60
-//        let finalHours = finalMinutes / 60
-//        let remainderSeconds = finalSeconds - (finalMinutes * 60)
-//        let remainderMinutes = finalMinutes - (finalHours * 60)
-//        
-//        if finalSeconds < 60 {
-//            let messageString = "\(finalSeconds) Sec."
-//            clipLengthLabel.text = "\(messageString)"
-//        } else if finalMinutes < 60 {
-//            let messageString = "\(finalMinutes) Min., \(remainderSeconds) Sec."
-//            clipLengthLabel.text = "\(messageString)"
-//        } else {
-//            let messageString = finalHours == 1 ? "\(finalHours) Hr, \(remainderMinutes) Min., \(remainderSeconds) Sec." : "\(finalHours) Hrs, \(remainderMinutes) Min., \(remainderSeconds) Sec."
-//            clipLengthLabel.text = "\(messageString)"
-//        }
-        
     }
-    
-    
     
     // MARK: - QUICK CLEAR
     
@@ -531,7 +553,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBAction func quickClearHit(_ sender: Any) {
         
         cleanUp()
-
         
     }
     
@@ -553,6 +574,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
         timeSecond.text = "00"
         timeMinute.text = "00"
         timeHour.text = "00"
+        
+        newClipLength = 0.0
         
         countdownIsOn = false
         
