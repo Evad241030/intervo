@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		225377271E832DBC00DF5083 /* didFinishUpdatingSeconds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225377261E832DBC00DF5083 /* didFinishUpdatingSeconds.swift */; };
 		228813C01E7B297F000C3928 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228813BF1E7B297F000C3928 /* AppDelegate.swift */; };
 		228813C21E7B297F000C3928 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228813C11E7B297F000C3928 /* ViewController.swift */; };
 		228813C51E7B297F000C3928 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 228813C31E7B297F000C3928 /* Main.storyboard */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		225377261E832DBC00DF5083 /* didFinishUpdatingSeconds.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = didFinishUpdatingSeconds.swift; sourceTree = "<group>"; };
 		228813BC1E7B297F000C3928 /* intervo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = intervo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		228813BF1E7B297F000C3928 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		228813C11E7B297F000C3928 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -58,6 +60,7 @@
 			children = (
 				228813BF1E7B297F000C3928 /* AppDelegate.swift */,
 				228813C11E7B297F000C3928 /* ViewController.swift */,
+				225377261E832DBC00DF5083 /* didFinishUpdatingSeconds.swift */,
 				228813C31E7B297F000C3928 /* Main.storyboard */,
 				22D1116A1E7C46B40039F580 /* ClockReadout.swift */,
 				228813C61E7B297F000C3928 /* Assets.xcassets */,
@@ -141,6 +144,7 @@
 			files = (
 				228813C21E7B297F000C3928 /* ViewController.swift in Sources */,
 				228813C01E7B297F000C3928 /* AppDelegate.swift in Sources */,
+				225377271E832DBC00DF5083 /* didFinishUpdatingSeconds.swift in Sources */,
 				22D1116B1E7C46B40039F580 /* ClockReadout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
