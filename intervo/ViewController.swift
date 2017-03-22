@@ -38,6 +38,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     var startStopWatch: Bool = true
     var timerIsOn = false
+    
+    // This value is from Slider
     var shootInterval: Int = 1
     
     // Maybe Clear???
@@ -321,15 +323,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         
-        
         if countDownSwitch.isOn == false {
             return false
         } else {
             
         textField.clearsOnBeginEditing = true
 
-            // For times when countdown is in progress - and I've re-entered into a text field
-            
+        // For times when countdown is in progress - and I've re-entered into a text field
         if countdownIsOn == true {
             countDownTimer.invalidate()
             countdownIsOn = false
@@ -341,14 +341,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
 //            StartCountdown.setTitle("Start Countdown", for: .normal)
 //            startStopCountdown = true
 //        }
-
             
         if textField == timeSecond {
             var tempSecond: Int = 0
             if let secondText = textField.text {
                 tempSecond = Int(secondText) ?? 0
                 framesNeeded -= tempSecond
-//                framesShotLabel.text = "\(framesNeeded)"
             }
             
         }
@@ -359,8 +357,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 tempMinute = Int(minuteText) ?? 0
                 framesNeeded -= tempMinute * 60
             }
-
-//            framesShotLabel.text = "\(framesNeeded)"
         }
         
         if textField == timeHour {
@@ -369,11 +365,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 tempHour = Int(hourText) ?? 0
                 framesNeeded -= (tempHour * 60) * 60
             }
-//            framesShotLabel.text = "\(framesNeeded)"
         }
         }
-            
+        
         return true
+        
     }
     
 
@@ -431,9 +427,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
     }
 
-    // This works with my main clock. Is called by timer.
+    // My main clock. Called by timer.
     func updateTimer() {
-
+//FIX: Protect against going over 99 hours.
         clockOne.seconds += 1
         
         if clockOne.seconds == 60 {
@@ -457,30 +453,19 @@ class ViewController: UIViewController, UITextFieldDelegate {
         updateFrames()
     }
     
-    
-//    func updateCountdown() {
-//        if countDownFrames > 0 {
-//        countDownFrames -= 1
-//            framesShotLabel.text = ("\(countDownFrames)")
-//        } else {
-//            countDownTimer.invalidate()
-//            timerButton.setTitle("Start Timer", for: UIControlState.normal)
-//        }
-//    }
-    
     // Updates Frames Shot Label - Based on increment.
+    // FIX: How do you set it to shoot initial frame - for example, if shoot interval is 5, does it shoot at 0 and 5, or just 5, 10, 15?
     func updateFrames() {
 
         intervalCounter += 1
         
-    
         if shootInterval < 1 {
             framesShot += 2
             framesShotLabel.text = "\(framesShot)"
             intervalCounter = 0
         } else if shootInterval == intervalCounter {
             framesShot += 1
-        framesShotLabel.text = "\(framesShot)"
+            framesShotLabel.text = "\(framesShot)"
             intervalCounter = 0
         }
         
@@ -489,27 +474,35 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // Updates estimated Clip Length / Called when framesShot is set.
     func updateLabels() {
         
-        let finalSeconds = framesShot / fps
-        let finalMinutes = finalSeconds / 60
-        let finalHours = finalMinutes / 60
-        let remainderSeconds = finalSeconds - (finalMinutes * 60)
-        let remainderMinutes = finalMinutes - (finalHours * 60)
-    
-        if finalSeconds < 60 {
-            let messageString = "\(finalSeconds) Sec."
-            clipLengthLabel.text = "\(messageString)"
-        } else if finalMinutes < 60 {
-            let messageString = "\(finalMinutes) Min., \(remainderSeconds) Sec."
-            clipLengthLabel.text = "\(messageString)"
+        // FIX: Need to safely unwrap this!
+        let finalSeconds: Double = Double(framesShot) / Double(fps)
+        let finalMinutes: Double = finalSeconds / 60
+        let finalHours: Double  = finalMinutes / 60
+        let remainderSeconds = (Int(finalSeconds) - (60 * Int(finalMinutes)))
+        let remainderMinutes = (Int(finalMinutes) - (60 * Int(finalHours)))
+        
+        // FIX: Need to format these numbers to display correctly.
+        if finalSeconds < 60.0 {
+            let messageString = Int(finalSeconds)
+            clipLengthLabel.text = ":\(messageString) Sec."
+        } else if finalMinutes < 60.0 {
+            let messageString = Int(finalMinutes)
+            clipLengthLabel.text = "\(messageString) Min., :\(remainderSeconds) Sec."
         } else {
-            let messageString = finalHours == 1 ? "\(finalHours) Hr, \(remainderMinutes) Min., \(remainderSeconds) Sec." : "\(finalHours) Hrs, \(remainderMinutes) Min., \(remainderSeconds) Sec."
-            clipLengthLabel.text = "\(messageString)"
+            let messageString = Int(finalHours)
+            clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
         }
         
     }
 
     // Need to calculate this for countdown
     func updateCountDownLabels() {
+        // The total initial frames should be recorded.
+        // This should estimate how long this would be as a final length...
+        // The final length goes up - as countdown goes down. - 
+        // In effect, I'll know my current final length - even if I still have frames to shoot.
+        
+        
         return
 //        let finalSeconds = framesShot / fps
 //        let finalMinutes = finalSeconds / 60
