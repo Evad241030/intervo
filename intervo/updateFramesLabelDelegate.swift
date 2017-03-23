@@ -8,8 +8,10 @@
 
 import Foundation
 
-protocol DidFinishUdatingSecondsDelegate {
+protocol UpdateFramesLabelDelegate {
     
-    func didFinishUpdatingSeconds(second: Int)
+    func didFinishUpdatingSeconds(secondsNeeded: Int)
+
+    func didFinishUpdatingFrames(framesNeeded: Int)
     
 }

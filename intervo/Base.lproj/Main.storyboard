@@ -144,6 +144,7 @@
                         <outlet property="clipLengthLabel" destination="aam-c4-3w5" id="A5J-OS-HNt"/>
                         <outlet property="countDownSwitch" destination="3Fc-MO-ePO" id="1f7-20-yKq"/>
                         <outlet property="fpsSegmentControl" destination="rFB-Wy-9Bj" id="3sJ-h3-ufG"/>
+                        <outlet property="frameStatusLabel" destination="Tkx-b5-WMc" id="pcA-K7-rqm"/>
                         <outlet property="framesShotLabel" destination="5Lm-Na-A2K" id="4XS-nG-Uqp"/>
                         <outlet property="intervalSlider" destination="2Zv-wJ-W4V" id="fRA-L0-4G0"/>
                         <outlet property="quickClear" destination="4g5-zu-Gwc" id="jll-1s-sFi"/>
