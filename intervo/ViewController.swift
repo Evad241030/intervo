@@ -6,7 +6,6 @@
 //  Copyright © 2017 David Gonzalez. All rights reserved.
 //
 
-
 // A. Make work when resigned to background.
 // B. Set user defaults.
 // C. Format Frames Counting with commas.
@@ -43,8 +42,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     }
     
     func didFinishUpdatingFrames(framesNeeded: Int) {
-        print("Test update frames delegate - seconds example \(framesNeeded)")
+        guard framesNeeded < 0 else {
+            print("Test update frames delegate - seconds example \(framesNeeded)")
         framesShotLabel.text = "\(framesNeeded)"
+            return
+        }
     }
     
     // MARK: - Timer vars
@@ -188,6 +190,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             StartCountdown.isEnabled = true
             startStopCountdown = true
             frameStatusLabel.text = "Frames Needed"
+            disableToggle()
         } else {
             startStopWatch = true
             timerButton.isEnabled = true
@@ -197,6 +200,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             countDownTimer.invalidate()
             countdownIsOn = false
             frameStatusLabel.text = "Frames Shot"
+            disableToggle()
         }
         
     }
@@ -239,17 +243,24 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         frameInterval += 1
 
         // FRAMES Decrement based on frame interval and time
-        if frameInterval == shootInterval {
+        
+        // if .5 decrement by two 
+        if shootInterval == 0 {
+            framesNeeded -= 2
+            didFinishUpdatingFrames(framesNeeded: framesNeeded)
+            frameInterval = 0
+            updateCountDownLabels()
+        } else if frameInterval == shootInterval {
             if framesNeeded >= 1 {
                 framesNeeded -= 1
                 didFinishUpdatingFrames(framesNeeded: framesNeeded)
                 frameInterval = 0
+                updateCountDownLabels()
             }
-            updateCountDownLabels()
         }
         
         // FIX: Time decrements - in real time... based on seconds only....!!!!!
-        // THis is why minutes don't work yet.
+        // THis is why minutes don't work yet. DO THIS!
         if holdSecond > 0 {
             holdSecond -= 1
             timeSecond.text = "\(holdSecond)"
@@ -290,28 +301,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
                 let messageString = Int(finalHours)
                 clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
             }
-            
-            
-            /*
-             let finalSeconds = countDownTally
-             let finalMinutes = finalSeconds / 60
-             let finalHours = finalMinutes / 60
-             let remainderSeconds = finalSeconds - (finalMinutes * 60)
-             let remainderMinutes = finalMinutes - (finalHours * 60)
-             //
-             if finalSeconds < 60.0 {
-             let messageString = Int(finalSeconds)
-             clipLengthLabel.text = ":\(messageString) Sec."
-             } else if finalMinutes < 60.0 {
-             let messageString = Int(finalMinutes)
-             clipLengthLabel.text = "\(messageString) Min., :\(remainderSeconds) Sec."
-             } else {
-             let messageString = Int(finalHours)
-             clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
-             }
-             */
-            
-            return
+//            return
         }
         
     
@@ -326,8 +316,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         
-        secondsNeeded = 0
-        framesNeeded = 0
         
         if countDownSwitch.isOn == false {
             return false
@@ -341,14 +329,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
                 StartCountdown.setTitle("Countdown Paused", for: .normal)
             }
             
-            // Instead of this - I should be pausing the countown by force....
-            //        if StartCountdown.titleLabel?.text == "Pause Countdown" {
-            //            StartCountdown.setTitle("Start Countdown", for: .normal)
-            //            startStopCountdown = true
-            //        }
-            // Frames Needed is in seconds - I have not assigned the label yet.
+
             if textField == timeSecond {
-                (print("I am about to be subtracted -- \(secondsNeeded) : secondsSecond, \(framesNeeded) FramesNeeded."))
+                framesNeeded = 0
+                secondsNeeded = 0
                 didFinishUpdatingSeconds(secondsNeeded: secondsNeeded)
             }
             
@@ -398,7 +382,16 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
                 holdSecond = Int(second) ?? 0
                 print("I am hold second \(holdSecond)")
             secondsNeeded += holdSecond
-                framesNeeded += secondsNeeded / fps
+                
+                /// Can't do this divide is bad - especially if you're shoot interval is .5
+                if shootInterval == 0 {
+                    framesNeeded += Int(Double(secondsNeeded) / 0.5 )
+                } else {
+                    framesNeeded += Int(secondsNeeded / shootInterval)
+                }
+                
+                
+                
                 print("\(framesNeeded) - Global Var")
             timeSecond.text = "\(holdSecond)"
                 didFinishUpdatingSeconds(secondsNeeded: secondsNeeded)
@@ -575,6 +568,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         
         framesShot = 0
         framesNeeded = 0
+        secondsNeeded = 0
         
         intervalCounter = 0
         
@@ -598,20 +592,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     // Turn on or off any features when timer is running or when time is not running.
     func disableToggle() {
         
-        if timerIsOn {
+        if timerIsOn || countdownIsOn {
             intervalSlider.isEnabled = false
             quickClear.isEnabled = false
+            fpsSegmentControl.isEnabled = false
         } else {
             intervalSlider.isEnabled = true
             quickClear.isEnabled = true
-        }
-        
-        if countdownIsOn {
-            intervalSlider.isEnabled = false
-            quickClear.isEnabled = false
-        } else {
-            intervalSlider.isEnabled = true
-            quickClear.isEnabled = true
+            fpsSegmentControl.isEnabled = true
         }
         
     }
