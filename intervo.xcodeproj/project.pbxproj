@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		221EFE081E84C1F4006548B3 /* TimerDidReachLimitDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 221EFE071E84C1F4006548B3 /* TimerDidReachLimitDelegate.swift */; };
 		225377271E832DBC00DF5083 /* updateFramesLabelDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 225377261E832DBC00DF5083 /* updateFramesLabelDelegate.swift */; };
 		228813C01E7B297F000C3928 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228813BF1E7B297F000C3928 /* AppDelegate.swift */; };
 		228813C21E7B297F000C3928 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228813C11E7B297F000C3928 /* ViewController.swift */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		221EFE071E84C1F4006548B3 /* TimerDidReachLimitDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerDidReachLimitDelegate.swift; sourceTree = "<group>"; };
 		225377261E832DBC00DF5083 /* updateFramesLabelDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = updateFramesLabelDelegate.swift; sourceTree = "<group>"; };
 		228813BC1E7B297F000C3928 /* intervo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = intervo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		228813BF1E7B297F000C3928 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -62,6 +64,7 @@
 				228813C11E7B297F000C3928 /* ViewController.swift */,
 				225377261E832DBC00DF5083 /* updateFramesLabelDelegate.swift */,
 				228813C31E7B297F000C3928 /* Main.storyboard */,
+				221EFE071E84C1F4006548B3 /* TimerDidReachLimitDelegate.swift */,
 				22D1116A1E7C46B40039F580 /* ClockReadout.swift */,
 				228813C61E7B297F000C3928 /* Assets.xcassets */,
 				228813C81E7B297F000C3928 /* LaunchScreen.storyboard */,
@@ -142,6 +145,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				221EFE081E84C1F4006548B3 /* TimerDidReachLimitDelegate.swift in Sources */,
 				228813C21E7B297F000C3928 /* ViewController.swift in Sources */,
 				228813C01E7B297F000C3928 /* AppDelegate.swift in Sources */,
 				225377271E832DBC00DF5083 /* updateFramesLabelDelegate.swift in Sources */,

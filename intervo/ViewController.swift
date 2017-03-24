@@ -21,10 +21,23 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDelegate {
+class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDelegate, TimeDidReachLimitDelegate {
 
     // MARK: Global Variables
     var delegate: UpdateFramesLabelDelegate?
+    var limitDelegate: TimeDidReachLimitDelegate?
+    // Shuts off timer if it goes ove 99 hours
+    func TimerDidReachMaxLimit() {
+        if clockOne.seconds == 356400 {
+            timer.invalidate()
+        }
+    }
+    
+    func TimerDidReachMinLimit() {
+        if framesNeeded == 1 {
+            countDownTimer.invalidate()
+        }
+    }
     
     func didFinishUpdatingSeconds(secondsNeeded: Int) {
         
@@ -242,6 +255,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         
         frameInterval += 1
 
+        TimerDidReachMinLimit()
+        
+        
         // FRAMES Decrement based on frame interval and time
         
         // if .5 decrement by two 
@@ -482,6 +498,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
 //FIX: Protect against going over 99 hours.
         clockOne.seconds += 1
         
+        TimerDidReachMaxLimit()
+        
         if clockOne.seconds == 60 {
             clockOne.minutes += 1
             clockOne.seconds = 0
@@ -521,7 +539,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         
     }
 
-    // Updates estimated Clip Length / Called when framesShot is set.
+    // Updates estimated Final Clip Length For Both Timer and Countdown / Called when framesShot is set.
     func updateTimerClipLength() {
         
         // FIX: Need to safely unwrap this!
@@ -532,18 +550,49 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         let remainderMinutes = (Int(finalMinutes) - (60 * Int(finalHours)))
         
         // FIX: Need to format these numbers to display correctly.
-        if finalSeconds < 60.0 {
-            let messageString = Int(finalSeconds)
-            clipLengthLabel.text = ":\(messageString) Sec."
-        } else if finalMinutes < 60.0 {
-            let messageString = Int(finalMinutes)
-            clipLengthLabel.text = "\(messageString) Min., :\(remainderSeconds) Sec."
+        if finalHours > 0.0, remainderMinutes < 10, remainderSeconds < 10 {
+            let convertedHours = Int(finalHours)
+            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+        } else if finalHours > 0.0, remainderMinutes < 10, remainderSeconds > 9 {
+            let convertedHours = Int(finalHours)
+            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+        } else if finalHours > 0.0, remainderMinutes > 9, remainderSeconds < 10 {
+            let convertedHours = Int(finalHours)
+                clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+        } else if finalMinutes > 0.0, remainderSeconds < 10 {
+            let convertedMinutes = Int(finalMinutes)
+            clipLengthLabel.text = convertedMinutes < 10 ? "0\(convertedMinutes) Min., :0\(remainderSeconds) Sec." : "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
+        } else if finalMinutes > 0.0, remainderSeconds > 9 {
+            let convertedMinutes = Int(finalMinutes)
+            // I don't need to do a nil coalesce here
+            clipLengthLabel.text = "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
         } else {
-            let messageString = Int(finalHours)
-            clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+            let convertedSeconds = Int(finalSeconds)
+            clipLengthLabel.text = convertedSeconds > 9 ? ":\(convertedSeconds) Sec." : ":0\(convertedSeconds) Sec."
         }
-        
+            
     }
+//        if finalSeconds < 60.0 {
+//            let convertedSeconds = Int(finalSeconds)
+//            clipLengthLabel.text = convertedSeconds > 9 ? ":\(convertedSeconds) Sec." : ":0\(convertedSeconds) Sec."
+//        } else if finalMinutes > 00.0, remainderSeconds < 10 {
+//            let convertedMinutes = Int(finalMinutes)
+//            clipLengthLabel.text = convertedMinutes < 10 ? "0\(convertedMinutes) Min., :0\(remainderSeconds) Sec." : "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
+//        } else if finalMinutes > 0.0, remainderSeconds > 9 {
+//            let convertedMinutes = Int(finalMinutes)
+//            // I don't need to do a nil coalesce here
+//            clipLengthLabel.text = convertedMinutes > 9 ? "\(convertedMinutes) Min., :\(remainderSeconds) Sec." : "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
+//        } else if finalHours > 0.0, remainderMinutes < 10, remainderSeconds < 10 {
+//            let convertedHours = Int(finalHours)
+//            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+//        } else if finalHours > 0.0, remainderMinutes < 10, remainderSeconds > 9 {
+//            let convertedHours = Int(finalHours)
+//            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+//        } else {
+//            let convertedHours = Int(finalHours)
+//            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+//        }
+//    }
 
 
     
