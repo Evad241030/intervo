@@ -40,7 +40,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     }
     
     func didFinishUpdatingSeconds(secondsNeeded: Int) {
-        
+
         // This allows me to pick 0 for my shoot interval - I allow it to replace it with 0.5
         
         if countDownSwitch.isOn == true {
@@ -48,18 +48,32 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
                 framesNeeded = Int(Double(secondsNeeded) / 0.5)
             }
         }
+        
+        
+        
         let updateShotLabel = shootInterval == 0 ? Int(Double(secondsNeeded) / 0.5) : Int(Double(secondsNeeded) / Double(shootInterval))
 
-        framesShotLabel.text = ("\(updateShotLabel)")
+        
+        let numberWithCommas = NumberFormatter.localizedString(from: NSNumber(value: updateShotLabel), number: NumberFormatter.Style.decimal)
+        
+        
+//        framesShotLabel.text = ("\(updateShotLabel)")
+        framesShotLabel.text = ("\(numberWithCommas)")
 
     }
     
     func didFinishUpdatingFrames(framesNeeded: Int) {
+        
         guard framesNeeded < 0 else {
-            print("Test update frames delegate - seconds example \(framesNeeded)")
-        framesShotLabel.text = "\(framesNeeded)"
+         
+            framesShotLabel.text = "\(framesNeeded)"
+
+            
             return
         }
+        
+        
+        
     }
     
     // MARK: - Timer vars
@@ -306,18 +320,44 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             let remainderSeconds = Int(finalSeconds) - (Int(finalMinutes) * 60)
             let remainderMinutes = Int(finalMinutes) - ((Int(finalHours) * 60) * 60)
             
+            // MARK: - OVER HERE!!!!
             
-            if finalSeconds < 60.0 {
-                let messageString = Int(finalSeconds)
-                clipLengthLabel.text = ":\(messageString) Sec."
-            } else if finalMinutes < 60.0 {
-                let messageString = Int(finalMinutes)
-                clipLengthLabel.text = "\(messageString) Min., :\(remainderSeconds) Sec."
+//            if finalSeconds < 60.0 {
+//                let messageString = Int(finalSeconds)
+//                clipLengthLabel.text = ":\(messageString) Sec."
+//            } else if finalMinutes < 60.0 {
+//                let messageString = Int(finalMinutes)
+//                clipLengthLabel.text = "\(messageString) Min., :\(remainderSeconds) Sec."
+//            } else {
+//                let messageString = Int(finalHours)
+//                clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+//            }
+
+            
+            if finalHours > 0.0, remainderMinutes < 10, remainderSeconds < 10 {
+                let convertedHours = Int(finalHours)
+                clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+            } else if finalHours > 0.0, remainderMinutes < 10, remainderSeconds > 9 {
+                let convertedHours = Int(finalHours)
+                clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+            } else if finalHours > 0.0, remainderMinutes > 9, remainderSeconds < 10 {
+                let convertedHours = Int(finalHours)
+                clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+            } else if finalMinutes > 0.0, remainderSeconds < 10 {
+                let convertedMinutes = Int(finalMinutes)
+                clipLengthLabel.text = convertedMinutes < 10 ? "0\(convertedMinutes) Min., :0\(remainderSeconds) Sec." : "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
+            } else if finalMinutes > 0.0, remainderSeconds > 9 {
+                let convertedMinutes = Int(finalMinutes)
+                // I don't need to do a nil coalesce here
+                clipLengthLabel.text = "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
             } else {
-                let messageString = Int(finalHours)
-                clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+                let convertedSeconds = Int(finalSeconds)
+                clipLengthLabel.text = convertedSeconds > 9 ? ":\(convertedSeconds) Sec." : ":0\(convertedSeconds) Sec."
             }
-//            return
+            
+            
+            
+            
         }
         
     
@@ -529,11 +569,20 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         
         if shootInterval < 1 {
             framesShot += 2
-            framesShotLabel.text = "\(framesShot)"
+            
+            let numberWithCommas = NumberFormatter.localizedString(from: NSNumber(value: framesShot), number: NumberFormatter.Style.decimal)
+            
+//            framesShotLabel.text = "\(framesShot)"
+            framesShotLabel.text = "\(numberWithCommas)"
+            
             intervalCounter = 0
         } else if shootInterval == intervalCounter {
             framesShot += 1
-            framesShotLabel.text = "\(framesShot)"
+            
+            let numberWithCommas = NumberFormatter.localizedString(from: NSNumber(value: framesShot), number: NumberFormatter.Style.decimal)
+            framesShotLabel.text = "\(numberWithCommas)"
+//            framesShotLabel.text = "\(framesShot)"
+
             intervalCounter = 0
         }
         
