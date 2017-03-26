@@ -5,16 +5,13 @@
 //  Created by DAVID GONZALEZ on 3/16/17.
 //  Copyright © 2017 David Gonzalez. All rights reserved.
 //
+// A. Set user defaults
+// B. Resign to Background.
+// C. Tab View Controller - for CountDown Timer
 
-// 1. When I set Timer (Time Priority) It should convert to a countdown timer - I should see Frames Needed and Get Estimate Clip Length Calculate.
-// 2. When I set Estimated ClipLength (clipLength Priority) - I should get CountDown Timer, and show frames needed
-// 3. How am I affecting Estimated Clip length when I dynamically change FPS - How do I know if I'm cross threads?
-// 4. How do I set values to determine Shoot Interval?
-// 5. Can this work when it is resigned to background?
-// 6. Should I set user defaults - It would be nice for the user to always have a standard timelapse they want to start at and configure later.
-// 7. What if I did a countdown start button?
-//8. Format Frames Counting with commas.
-//FIX: Need to disable Segmented Control - as it does not change when the timer is stopped.
+
+// 1. Format Frames with commas.
+
 
 //TOD0: Set inital frame to 1, or in the case of .5 to 2 since you should if you set your timer simultaneous to clicking your shutter, you start with at least 1 shot.
 
@@ -56,32 +53,39 @@ class ViewController: UIViewController {
         switch fpsSelected {
         case 0:
             fps = 24
-            print("\(fps)")
         case 1:
             fps = 25
-            print("\(fps)")
         case 2:
             fps = 30
-            print("\(fps)")
         case 3:
             fps = 60
-            print("\(fps)")
         case 4:
             fps = 120
-            print("\(fps)")
         default:
             fps = 24
-            print("\(fps)")
         }
+    
+        updateLabels()
+        
     }
+    
+    func formatFramesshot(frames: Int) {
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = NumberFormatter.Style.decimal
+        let result = formatter.string(from: NSNumber(value: frames))
+        
+        framesShotLabel.text = result
+        
+    }
+    
     
     @IBAction func sliderMoved(_ sender: Any) {
 
-        
         let tempValue = intervalSlider.value
         
         if tempValue == 0.0 {
-            shootInterval = Int(Double(tempValue))
+            shootInterval = 0
             sliderLabel.text = "Shoot Interval: 0.5 seconds."
         } else if tempValue >= 1.0 {
             shootInterval = Int(Double(tempValue))
@@ -94,14 +98,11 @@ class ViewController: UIViewController {
     @IBOutlet weak var clipLengthLabel: UILabel!
     @IBOutlet weak var sliderLabel: UILabel!
     @IBOutlet weak var framesShotLabel: UILabel!
-    //MARK: ClockReadout Label
+    
+    //MARK: - ClockReadout Label
     @IBOutlet weak var timerLabel: UILabel!
-    
     @IBOutlet weak var intervalSlider: UISlider!
-    
-    //MARK: -- Consider renaming this Start/Stop Button
-    @IBOutlet weak var timerButton: UIButton!
-    
+    @IBOutlet weak var startTimerButton: UIButton!
     
     @IBOutlet weak var quickClear: UIButton!
     @IBAction func quickClearHit(_ sender: Any) {
@@ -114,17 +115,17 @@ class ViewController: UIViewController {
         clipLength.hours = 0
         framesShot = 0
         
-        timerLabel.text = "00:00:00"
-        framesShotLabel.text = "000"
+        timerLabel.text = "0 Sec."
+        framesShotLabel.text = "0"
     }
     
-    //This is the action version of my my StartStop Button. I didn't rename it to avoid the hassle.
-    @IBAction func timerButtonHit(_ sender: Any) {
+    
+    @IBAction func startTimerButtonHit(_ sender: UIButton) {
         
         if startStopWatch == true {
             timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
             
-            timerButton.setTitle("Pause Timer", for: UIControlState.normal)
+            startTimerButton.setTitle("Pause Timer", for: UIControlState.normal)
             
             startStopWatch = false
             timerIsOn = true
@@ -134,25 +135,25 @@ class ViewController: UIViewController {
         } else {
             timer.invalidate()
             
-            
-            timerButton.setTitle("Start Timer", for: UIControlState.normal)
+            startTimerButton.setTitle("Start Timer", for: UIControlState.normal)
             
             startStopWatch = true
             timerIsOn = false
             
             disableToggle()
         }
-        
     }
-
+    
     // Turn on or off any features when timer is running or when time is not running.
     func disableToggle() {
         if timerIsOn {
             intervalSlider.isEnabled = false
             quickClear.isEnabled = false
+            fpsSegmentControl.isEnabled = false
         } else {
             intervalSlider.isEnabled = true
             quickClear.isEnabled = true
+            fpsSegmentControl.isEnabled = true
         }
 
     }
@@ -189,14 +190,15 @@ class ViewController: UIViewController {
 
         intervalCounter += 1
         
-    
         if shootInterval < 1 {
             framesShot += 2
-            framesShotLabel.text = "\(framesShot)"
+            formatFramesshot(frames: framesShot)
+//            framesShotLabel.text = "\(framesShot)"
             intervalCounter = 0
         } else if shootInterval == intervalCounter {
             framesShot += 1
-        framesShotLabel.text = "\(framesShot)"
+            formatFramesshot(frames: framesShot)
+//        framesShotLabel.text = "\(framesShot)"
             intervalCounter = 0
         }
         
@@ -208,39 +210,19 @@ class ViewController: UIViewController {
         let finalSeconds = framesShot / fps
         let finalMinutes = finalSeconds / 60
         let finalHours = finalMinutes / 60
-        let remainderSeconds = finalSeconds - (finalMinutes * 60)
-        let remainderMinutes = finalMinutes - (finalHours * 60)
+        let remainderSecondsSlot = finalSeconds - (finalMinutes * 60)
+        let remainderMinutesSlot = finalMinutes - (finalHours * 60)
     
-        if finalSeconds < 60 {
-            let messageString = "\(finalSeconds) Sec."
-            clipLengthLabel.text = "\(messageString)"
-        } else if finalMinutes < 60 {
-            let messageString = "\(finalMinutes) Min., \(remainderSeconds) Sec."
-            clipLengthLabel.text = "\(messageString)"
+        if finalHours > 0 {
+            clipLengthLabel.text = finalHours == 1 ? "\(finalHours) Hr., \(remainderMinutesSlot) Min., \(remainderSecondsSlot) Sec." : "\(finalHours) Hrs., \(remainderMinutesSlot) Min., \(remainderSecondsSlot) Sec."
+        } else if finalMinutes > 0 {
+            clipLengthLabel.text =  "\(remainderMinutesSlot) Min., \(remainderSecondsSlot) Sec."
         } else {
-            let messageString = finalHours == 1 ? "\(finalHours) Hr, \(remainderMinutes) Min., \(remainderSeconds) Sec." : "\(finalHours) Hrs, \(remainderMinutes) Min., \(remainderSeconds) Sec."
-            clipLengthLabel.text = "\(messageString)"
-        }
-        
-        
-    /*
-        switch newLength {
-        case 0..<60:
-            let secondsString = newLength == 1 ? "\(newLength) second long" : "\(newLength) seconds long"
-            clipLengthLabel.text = "\(secondsString)"
-        case 60...10000:
-            let minutesString = minuteLength == 1 ? "\(minuteLength) minute long" : "\(minuteLength) minutes long"
-            clipLengthLabel.text = "\(minutesString)"
-            print("Test Seconds are: \(testSeconds)")
-        default:
-            clipLengthLabel.text = "Too Long."
-        }
-        */
-        
 
-        
+            clipLengthLabel.text =  "\(finalSeconds) Sec."
+        }
 
-        
+    
     }
  
     override func viewDidLoad() {
