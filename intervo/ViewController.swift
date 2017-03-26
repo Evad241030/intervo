@@ -34,6 +34,8 @@ class ViewController: UIViewController {
             updateLabels()
         }
     }
+
+
     
     var timerIsOn = false
     var fps: Int = 24
@@ -129,6 +131,10 @@ class ViewController: UIViewController {
             
             startStopWatch = false
             timerIsOn = true
+            
+            // User Defaults. Check  out View Did Appear
+            UserDefaults.standard.set(fpsSegmentControl.selectedSegmentIndex, forKey: "myFPS")
+            UserDefaults.standard.set(intervalSlider.value, forKey: "myInterval")
             
             disableToggle()
             
@@ -230,6 +236,28 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        if (UserDefaults.standard.object(forKey: "myFPS") as? Int) != nil {
+            
+           fpsSegmentControl.selectedSegmentIndex = (UserDefaults.standard.object(forKey: "myFPS") as? Int)!
+            
+        }
+        
+        if (UserDefaults.standard.object(forKey: "myInterval")) != nil {
+            shootInterval = (UserDefaults.standard.object(forKey: "myInterval") as! Int)
+            
+            intervalSlider.value = Float(shootInterval)
+            
+            if shootInterval == 0 {
+                sliderLabel.text = "Shoot Interval: 0.5 seconds."
+            } else if shootInterval >= 1 {
+                let displayString = shootInterval == 1 ? "\(shootInterval) second" : "\(shootInterval) seconds"
+                sliderLabel.text = "Shoot Interval: \(displayString)."
+            }
+            
+        }
+        
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
