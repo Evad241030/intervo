@@ -8,76 +8,49 @@
 
 // A. Make work when resigned to background.
 // B. Set user defaults.
-// C. Format Frames Counting with commas.
 
-//FIX: Need to disable Segmented Control - as it does not change when the timer is stopped.
-//FIX: Need to make fps selected affected calculation when countdown is paused. or before countdown starts.
+//FIX: Need to make fps selected affect calculation when countdown is paused. or before countdown starts.
 
 //TOD0: Set inital frame to 1, or in the case of .5 to 2 since you should if you set your timer simultaneous to clicking your shutter, you start with at least 1 shot.
 
-//TODO: I could refactor estimated clip length to create a second instance of ClockReadout.
-
-//TODO: I could branch out and make it so that You can enter desired clip length.
-
 import UIKit
 
-class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDelegate, TimeDidReachLimitDelegate {
-
-    // MARK: Global Variables
-    var delegate: UpdateFramesLabelDelegate?
-    var limitDelegate: TimeDidReachLimitDelegate?
-    // Shuts off timer if it goes ove 99 hours
-    func TimerDidReachMaxLimit() {
+class ViewController: UIViewController, UITextFieldDelegate {
+    
+    // If timer goes over 99 hours - timer resets back to 0.
+    func timerDidReachMaxLimit() {
         if clockOne.seconds == 356400 {
-            timer.invalidate()
+            clockOne.seconds = 0
         }
     }
     
-    func TimerDidReachMinLimit() {
-        if framesNeeded == 1 {
+    func timerDidReachMinLimit() {
+        if countdownMode.framesNeeded == 1 {
             countDownTimer.invalidate()
         }
     }
     
     func didFinishUpdatingSeconds(secondsNeeded: Int) {
-
-        // This allows me to pick 0 for my shoot interval - I allow it to replace it with 0.5
         
-        if countDownSwitch.isOn == true {
-            if shootInterval == 0 {
-                framesNeeded = Int(Double(secondsNeeded) / 0.5)
-            }
-        }
-        
-        
-        
-        let updateShotLabel = shootInterval == 0 ? Int(Double(secondsNeeded) / 0.5) : Int(Double(secondsNeeded) / Double(shootInterval))
+        let secondsToFramesNeeded = shootInterval == 0 ? Int(Double(secondsNeeded) / shootIntervalHalf) : Int(Double(secondsNeeded) / Double(shootInterval))
 
         
-        let numberWithCommas = NumberFormatter.localizedString(from: NSNumber(value: updateShotLabel), number: NumberFormatter.Style.decimal)
+        let numberWithCommas = NumberFormatter.localizedString(from: NSNumber(value: secondsToFramesNeeded), number: NumberFormatter.Style.decimal)
         
-        
-//        framesShotLabel.text = ("\(updateShotLabel)")
         framesShotLabel.text = ("\(numberWithCommas)")
-
+        
     }
     
     func didFinishUpdatingFrames(framesNeeded: Int) {
-        
-        guard framesNeeded < 0 else {
-         
+
+
             framesShotLabel.text = "\(framesNeeded)"
 
-            
-            return
-        }
-        
-        
         
     }
     
     // MARK: - Timer vars
-    var timer = Timer()
+    var countUpTimer = Timer()
     var framesShot: Int = 0 {
         didSet {
             updateTimerClipLength()
@@ -88,6 +61,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     
     // This value is from Slider
     var shootInterval: Int = 1
+    var shootIntervalHalf: Double = 0.5
     
     // Maybe Clear???
     var intervalCounter: Int = 0
@@ -96,15 +70,15 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     
     // MARK: - Countdown vars
     var countDownTimer = Timer()
-    var countdownIsOn = false
-    var framesNeeded: Int = 0
-    var secondsNeeded: Int = 0
-//        {
-//        didSet {
-//            updateCountDownLabels()
-//        }
-//    }
-    var actualFramesShot: Double = 0.0
+    var countdownMode = Countdown()
+
+    var reverse: Int = 0 {
+        didSet {
+           didReverse += 1
+        }
+    }
+    var didReverse: Double = 0
+
     
     //FIX: - Mabe Clear FOR SURE
     var frameInterval: Int = 0
@@ -114,11 +88,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     var holdHour: Int = 0
     
     var startStopCountdown: Bool = false
-    var countDownOne = ClockReadout()
+    
     var newClipLength: Double = 0.0
     
     // MARK: Shared Global Vars
-    var clipLength = ClockReadout()
+    var finalClipLength = ClockReadout()
     var fps: Int = 24
     
     override func viewDidLoad() {
@@ -166,15 +140,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         let tempValue = intervalSlider.value
         
         if tempValue == 0.0 {
-            shootInterval = Int(tempValue)
+            shootInterval = 0
             sliderLabel.text = "Shoot Interval: 0.5 seconds."
         } else if tempValue >= 1.0 {
             shootInterval = Int(tempValue)
             let displayString = shootInterval == 1 ? "\(shootInterval) second" : "\(shootInterval) seconds"
             sliderLabel.text = "Shoot Interval: \(displayString)."
         }
-        
-        didFinishUpdatingSeconds(secondsNeeded: secondsNeeded)
+
         
     }
     
@@ -210,7 +183,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     @IBAction func countDownSwitchHit(_ sender: UISwitch) {
         
         if countDownSwitch.isOn {
-            timer.invalidate()
+            countUpTimer.invalidate()
             timerIsOn = false
             cleanUp()
             timerButton.isEnabled = false
@@ -225,7 +198,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             cleanUp()
             startStopCountdown = false
             countDownTimer.invalidate()
-            countdownIsOn = false
+            countdownMode.isOn = false
             frameStatusLabel.text = "Frames Shot"
             disableToggle()
         }
@@ -244,9 +217,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             StartCountdown.setTitle("Pause Countdown", for: UIControlState.normal)
             
             startStopCountdown = false
-            //CountdownIsOn helps be disable Toggle()
-            countdownIsOn = true
-            didFinishUpdatingSeconds(secondsNeeded: secondsNeeded)
+            //CountdownMode.IsOn helps be disable Toggle()
+            countdownMode.isOn = true
+            didFinishUpdatingSeconds(secondsNeeded: countdownMode.secondsNeeded)
             disableToggle()
             
         } else {
@@ -255,7 +228,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             
             StartCountdown.setTitle("Start Countdown", for: UIControlState.normal)
             
-            countdownIsOn = false
+            countdownMode.isOn = false
             
             startStopCountdown = true
             
@@ -266,138 +239,127 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
 
     
     func updateCountdown() {
-        
+        /// OBVIOUSLY NEEDE TO RETHINK THIS
         frameInterval += 1
 
-        TimerDidReachMinLimit()
-        
-        
+
         // FRAMES Decrement based on frame interval and time
         
-        // if .5 decrement by two 
-        if shootInterval == 0 {
-            framesNeeded -= 2
-            didFinishUpdatingFrames(framesNeeded: framesNeeded)
+        // if .5 decrement by two
+        if shootInterval < 1 {
+            countdownMode.secondsNeeded -= 1
+            didFinishUpdatingSeconds(secondsNeeded: countdownMode.secondsNeeded)
             frameInterval = 0
             updateCountDownLabels()
         } else if frameInterval == shootInterval {
-            if framesNeeded >= 1 {
-                framesNeeded -= 1
-                didFinishUpdatingFrames(framesNeeded: framesNeeded)
+            if countdownMode.secondsNeeded >= 1 {
+                countdownMode.secondsNeeded -= 1
+                didFinishUpdatingFrames(framesNeeded: countdownMode.secondsNeeded)
                 frameInterval = 0
+
                 updateCountDownLabels()
             }
         }
         
-        // FIX: Time decrements - in real time... based on seconds only....!!!!!
-        // THis is why minutes don't work yet. DO THIS!
-        if holdSecond > 0 {
-            holdSecond -= 1
-            timeSecond.text = "\(holdSecond)"
-        }
-//        if holdMinute > 0 {
-//            holdMinute -= 1
-//            timeMinute.text = "\(holdMinute)"
-//        }
-//        
-//        if holdHour > 0 {
-//            holdSecond -= 1
-//            timeHour.text = "\(holdHour)"
-//        }
+        //PUNTING - this is for my text fields
+        clockOne.seconds += 1
+        
+        let secondsString = clockOne.seconds > 9 ? ":\(clockOne.seconds)" : ":0\(clockOne.seconds)"
+        let minutesString = clockOne.minutes > 9 ? ":\(clockOne.minutes)" : ":0\(clockOne.minutes)"
+        let hoursString = clockOne.hours > 9 ? ":\(clockOne.hours)" : ":0\(clockOne.hours)"
+        
+        timeSecond.text = secondsString
+        timeMinute.text = minutesString
+        timeHour.text = hoursString
+        
+        
+        // based on seconds only....!!!!!
+
+        
     }
     
-        // This is for final Clip Length - going up -
+        // This is for final Clip Length - going up - this is the bottom of the app
         // This is not elapsed time.
         func updateCountDownLabels() {
             
-            // FIX: CLEAR ACTUAL FRAMES SHOT
-            actualFramesShot += 1.0
+            reverse = countdownMode.framesNeeded
             
             // FIX:  I should use a protocol for this!!!!!
-            let finalSeconds = actualFramesShot / Double(fps)
+            let finalSeconds = didReverse / Double(fps)
             let finalMinutes = finalSeconds / 60.0
             let finalHours = finalMinutes / 60.0
             let remainderSeconds = Int(finalSeconds) - (Int(finalMinutes) * 60)
-            let remainderMinutes = Int(finalMinutes) - ((Int(finalHours) * 60) * 60)
-            
-            // MARK: - OVER HERE!!!!
-            
-//            if finalSeconds < 60.0 {
-//                let messageString = Int(finalSeconds)
-//                clipLengthLabel.text = ":\(messageString) Sec."
-//            } else if finalMinutes < 60.0 {
-//                let messageString = Int(finalMinutes)
-//                clipLengthLabel.text = "\(messageString) Min., :\(remainderSeconds) Sec."
-//            } else {
-//                let messageString = Int(finalHours)
-//                clipLengthLabel.text = finalHours == 1 ? "\(messageString) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(messageString) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
-//            }
-
+            let remainderMinutes = Int(finalMinutes) - ((Int(finalHours) * 60))
+        
             
             if finalHours > 0.0, remainderMinutes < 10, remainderSeconds < 10 {
                 let convertedHours = Int(finalHours)
-                clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+                clipLengthLabel.text = convertedHours == 1 ?
+                    "\(convertedHours) Hr. :0\(remainderMinutes) Min. :0\(remainderSeconds) Sec." :
+                "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
             } else if finalHours > 0.0, remainderMinutes < 10, remainderSeconds > 9 {
                 let convertedHours = Int(finalHours)
-                clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+                clipLengthLabel.text = convertedHours == 1 ?
+                    "\(convertedHours) Hr. :0\(remainderMinutes) Min. :\(remainderSeconds) Sec." :
+                "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :\(remainderSeconds) Sec."
             } else if finalHours > 0.0, remainderMinutes > 9, remainderSeconds < 10 {
                 let convertedHours = Int(finalHours)
-                clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+                clipLengthLabel.text = convertedHours == 1 ?
+                    "\(convertedHours) Hr. :\(remainderMinutes) Min. :0\(remainderSeconds) Sec." :
+                "\(convertedHours) Hrs., :\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+            } else if finalHours > 0.0, remainderMinutes > 9, remainderSeconds > 9 {
+                let convertedHours = Int(finalHours)
+                clipLengthLabel.text = convertedHours == 1 ?
+                    "\(convertedHours) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." :
+                "\(convertedHours) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
             } else if finalMinutes > 0.0, remainderSeconds < 10 {
                 let convertedMinutes = Int(finalMinutes)
-                clipLengthLabel.text = convertedMinutes < 10 ? "0\(convertedMinutes) Min., :0\(remainderSeconds) Sec." : "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
+                clipLengthLabel.text = convertedMinutes < 10 ?
+                    "0\(convertedMinutes) Min., :0\(remainderSeconds) Sec." :
+                "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
             } else if finalMinutes > 0.0, remainderSeconds > 9 {
                 let convertedMinutes = Int(finalMinutes)
                 // I don't need to do a nil coalesce here
                 clipLengthLabel.text = "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
             } else {
                 let convertedSeconds = Int(finalSeconds)
-                clipLengthLabel.text = convertedSeconds > 9 ? ":\(convertedSeconds) Sec." : ":0\(convertedSeconds) Sec."
+                clipLengthLabel.text = convertedSeconds > 9 ?
+                    ":\(convertedSeconds) Sec." :
+                ":0\(convertedSeconds) Sec."
             }
             
-            
-            
-            
         }
-        
-    
-    
-    
-    
     
     // MARK: - TextField Delegate Methods
-    
     
     // Clears out user's entry - but does not clear out previous number if app time is run first. This throws off evertyhing from then on.
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-        
         
         if countDownSwitch.isOn == false {
             return false
         } else {
             textField.clearsOnBeginEditing = true
             // For times when countdown is in progress - and I've re-entered into a text field
-            if countdownIsOn == true {
+            if countdownMode.isOn == true {
                 countDownTimer.invalidate()
-                countdownIsOn = false
+                countdownMode.isOn = false
                 startStopCountdown = true
                 StartCountdown.setTitle("Countdown Paused", for: .normal)
             }
             
-
             if textField == timeSecond {
-                framesNeeded = 0
-                secondsNeeded = 0
-                didFinishUpdatingSeconds(secondsNeeded: secondsNeeded)
+                countdownMode.framesNeeded = 0
+                countdownMode.secondsNeeded = 0
+                didFinishUpdatingSeconds(secondsNeeded: countdownMode.secondsNeeded)
             }
             
             if textField == timeMinute {
                 var tempMinute: Int = 0
                 if let minuteText = textField.text {
                     tempMinute = Int(minuteText)!
-                    secondsNeeded -= tempMinute * 60
-                    framesNeeded -= tempMinute * 60
+                    countdownMode.secondsNeeded -= tempMinute * 60
+                    countdownMode.framesNeeded -= tempMinute * 60
             
                 }
             }
@@ -406,8 +368,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
                 var tempHour: Int = 0
                 if let hourText = textField.text {
                     tempHour = Int(hourText)!
-                    secondsNeeded -= (tempHour * 60) * 60
-                    framesNeeded -= (tempHour * 60) * 60
+                    countdownMode.secondsNeeded -= (tempHour * 60) * 60
+                    countdownMode.framesNeeded -= (tempHour * 60) * 60
    
                 }
             }
@@ -421,9 +383,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         defer {
-            if countdownIsOn == false {
+            if countdownMode.isOn == false {
             StartCountdown.setTitle("Resume Countdown", for: .normal)
-
             }
         }
         
@@ -436,22 +397,17 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     
             if let second = textField.text {
                 holdSecond = Int(second) ?? 0
-                print("I am hold second \(holdSecond)")
-            secondsNeeded += holdSecond
+
+            countdownMode.secondsNeeded += holdSecond
                 
-                /// Can't do this divide is bad - especially if you're shoot interval is .5
-                if shootInterval == 0 {
-                    framesNeeded += Int(Double(secondsNeeded) / 0.5 )
-                } else {
-                    framesNeeded += Int(secondsNeeded / shootInterval)
-                }
-                
-                
-                
-                print("\(framesNeeded) - Global Var")
-            timeSecond.text = "\(holdSecond)"
-                didFinishUpdatingSeconds(secondsNeeded: secondsNeeded)
-                didFinishUpdatingFrames(framesNeeded: framesNeeded)
+//                if shootInterval == 0 {
+//                    countdownMode.framesNeeded += Int(Double(countdownMode.secondsNeeded) / 0.5 )
+//                } else {
+//                    countdownMode.framesNeeded += Int(countdownMode.secondsNeeded / shootInterval)
+//                }
+
+                didFinishUpdatingSeconds(secondsNeeded: countdownMode.secondsNeeded)
+//                didFinishUpdatingFrames(framesNeeded: countdownMode.framesNeeded)
             }
             
         }
@@ -460,10 +416,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             
             if let minute = textField.text {
                 holdMinute = Int(minute) ?? 0
-                framesNeeded += holdMinute
-                secondsNeeded += holdMinute * 60
+//                countdownMode.framesNeeded += holdMinute
+                countdownMode.secondsNeeded += holdMinute * 60
                 timeSecond.text = "\(holdMinute)"
-                didFinishUpdatingSeconds(secondsNeeded: secondsNeeded)
+                didFinishUpdatingSeconds(secondsNeeded: countdownMode.secondsNeeded)
             }
             
         }
@@ -472,10 +428,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             
             if let hour = textField.text {
                 holdHour = Int(hour) ?? 0
-                framesNeeded += holdMinute
-                secondsNeeded += (holdHour * 60) * 60
+//                countdownMode.framesNeeded += holdMinute
+                countdownMode.secondsNeeded += (holdHour * 60) * 60
                 timeHour.text = "\(holdHour)"
-                didFinishUpdatingSeconds(secondsNeeded: secondsNeeded)
+                didFinishUpdatingSeconds(secondsNeeded: countdownMode.secondsNeeded)
             }
         }
         
@@ -501,8 +457,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         return true
     }
     
-
-    
     //This is the action version of my my StartStop Button. I didn't rename it to avoid the hassle.
     
     // MARK: - TIMER BUTTON!
@@ -510,7 +464,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
     @IBAction func timerButtonHit(_ sender: Any) {
         
     if startStopWatch == true {
-            timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
+            countUpTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: (#selector(ViewController.updateTimer)), userInfo: nil, repeats: true)
             
             timerButton.setTitle("Pause Timer", for: UIControlState.normal)
             
@@ -520,7 +474,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
             disableToggle()
             
         } else {
-            timer.invalidate()
+            countUpTimer.invalidate()
             
             
             timerButton.setTitle("Start Timer", for: UIControlState.normal)
@@ -538,7 +492,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
 //FIX: Protect against going over 99 hours.
         clockOne.seconds += 1
         
-        TimerDidReachMaxLimit()
+        timerDidReachMaxLimit()
         
         if clockOne.seconds == 60 {
             clockOne.minutes += 1
@@ -588,7 +542,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         
     }
 
-    // Updates estimated Final Clip Length For Both Timer and Countdown / Called when framesShot is set.
+    // Updates estimated Final Clip Length For Timer/ Called when framesShot is set.
     func updateTimerClipLength() {
         
         // FIX: Need to safely unwrap this!
@@ -599,51 +553,38 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         let remainderMinutes = (Int(finalMinutes) - (60 * Int(finalHours)))
         
         // FIX: Need to format these numbers to display correctly.
-        if finalHours > 0.0, remainderMinutes < 10, remainderSeconds < 10 {
+        if finalHours > 0.1, remainderMinutes < 10, remainderSeconds < 10 {
             let convertedHours = Int(finalHours)
-            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
-        } else if finalHours > 0.0, remainderMinutes < 10, remainderSeconds > 9 {
+            clipLengthLabel.text = convertedHours == 1 ?
+                "\(convertedHours) Hr. :0\(remainderMinutes) Min. :0\(remainderSeconds) Sec." :
+            "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+        } else if finalHours > 0.1, remainderMinutes < 10, remainderSeconds > 9 {
             let convertedHours = Int(finalHours)
-            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :\(remainderSeconds) Sec."
-        } else if finalHours > 0.0, remainderMinutes > 9, remainderSeconds < 10 {
+            clipLengthLabel.text = convertedHours == 1 ?
+                "\(convertedHours) Hr. :0\(remainderMinutes) Min. :\(remainderSeconds) Sec." :
+            "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :\(remainderSeconds) Sec."
+        } else if finalHours > 0.1, remainderMinutes > 9, remainderSeconds < 10 {
             let convertedHours = Int(finalHours)
-                clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
-        } else if finalMinutes > 0.0, remainderSeconds < 10 {
+                clipLengthLabel.text = convertedHours == 1 ?
+                    "\(convertedHours) Hr. :\(remainderMinutes) Min. :0\(remainderSeconds) Sec." :
+            "\(convertedHours) Hrs., :\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
+        } else if finalMinutes > 0.9, remainderSeconds < 10 {
             let convertedMinutes = Int(finalMinutes)
-            clipLengthLabel.text = convertedMinutes < 10 ? "0\(convertedMinutes) Min., :0\(remainderSeconds) Sec." : "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
-        } else if finalMinutes > 0.0, remainderSeconds > 9 {
+            clipLengthLabel.text = convertedMinutes < 10 ?
+                ":0\(convertedMinutes) Min., :0\(remainderSeconds) Sec." :
+            ":\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
+        } else if finalMinutes > 0.9, remainderSeconds > 9 {
             let convertedMinutes = Int(finalMinutes)
             // I don't need to do a nil coalesce here
-            clipLengthLabel.text = "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
+            clipLengthLabel.text = ":\(convertedMinutes) Min., :\(remainderSeconds) Sec."
         } else {
             let convertedSeconds = Int(finalSeconds)
-            clipLengthLabel.text = convertedSeconds > 9 ? ":\(convertedSeconds) Sec." : ":0\(convertedSeconds) Sec."
+            clipLengthLabel.text = convertedSeconds > 9 ?
+                ":\(convertedSeconds) Sec." :
+            ":0\(convertedSeconds) Sec."
         }
             
     }
-//        if finalSeconds < 60.0 {
-//            let convertedSeconds = Int(finalSeconds)
-//            clipLengthLabel.text = convertedSeconds > 9 ? ":\(convertedSeconds) Sec." : ":0\(convertedSeconds) Sec."
-//        } else if finalMinutes > 00.0, remainderSeconds < 10 {
-//            let convertedMinutes = Int(finalMinutes)
-//            clipLengthLabel.text = convertedMinutes < 10 ? "0\(convertedMinutes) Min., :0\(remainderSeconds) Sec." : "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
-//        } else if finalMinutes > 0.0, remainderSeconds > 9 {
-//            let convertedMinutes = Int(finalMinutes)
-//            // I don't need to do a nil coalesce here
-//            clipLengthLabel.text = convertedMinutes > 9 ? "\(convertedMinutes) Min., :\(remainderSeconds) Sec." : "\(convertedMinutes) Min., :0\(remainderSeconds) Sec."
-//        } else if finalHours > 0.0, remainderMinutes < 10, remainderSeconds < 10 {
-//            let convertedHours = Int(finalHours)
-//            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :0\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
-//        } else if finalHours > 0.0, remainderMinutes < 10, remainderSeconds > 9 {
-//            let convertedHours = Int(finalHours)
-//            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :0\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :0\(remainderMinutes) Min., :0\(remainderSeconds) Sec."
-//        } else {
-//            let convertedHours = Int(finalHours)
-//            clipLengthLabel.text = convertedHours == 1 ? "\(convertedHours) Hr. :\(remainderMinutes) Min. :\(remainderSeconds) Sec." : "\(convertedHours) Hrs., :\(remainderMinutes) Min., :\(remainderSeconds) Sec."
-//        }
-//    }
-
-
     
     // MARK: - QUICK CLEAR
     
@@ -660,20 +601,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         clockOne.minutes = 0
         clockOne.seconds = 0
         
-        clipLength.minutes = 0
-        clipLength.seconds = 0
-        clipLength.hours = 0
+        finalClipLength.minutes = 0
+        finalClipLength.seconds = 0
+        finalClipLength.hours = 0
         
         framesShot = 0
-        framesNeeded = 0
-        secondsNeeded = 0
+        countdownMode.framesNeeded = 0
+        countdownMode.secondsNeeded = 0
         
         intervalCounter = 0
         
         framesShotLabel.text = "000"
         
-        actualFramesShot = 0.0
-        
+        countdownMode.actualFramesShot = 0.0
         
         timeSecond.text = "00"
         timeMinute.text = "00"
@@ -681,16 +621,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         
         newClipLength = 0.0
         
-        countdownIsOn = false
+        countdownMode.isOn = false
         
     }
-    
-    
     
     // Turn on or off any features when timer is running or when time is not running.
     func disableToggle() {
         
-        if timerIsOn || countdownIsOn {
+        if timerIsOn || countdownMode.isOn == true {
             intervalSlider.isEnabled = false
             quickClear.isEnabled = false
             fpsSegmentControl.isEnabled = false
@@ -708,7 +646,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UpdateFramesLabelDe
         self.view.endEditing(true)
         StartCountdown.setTitle("Resume Countdown", for: .normal)
     }
-    
     
 }
 
